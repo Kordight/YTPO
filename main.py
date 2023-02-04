@@ -9,13 +9,14 @@ from datetime import datetime
 
 today = datetime.today().strftime("%Y-%m-%d")
 
-
+#Reading variables from .ini
 config = configparser.ConfigParser()
 config.read('config.ini')
 min_similarity = float(config.get('main', 'min_similarity'))
 can_download_video=int(config.get('main', 'download_video'))
 can_download_music=int(config.get('main', 'download_music'))
 backup_playlist=int(config.get('main', 'backup_playlist'))
+
 playlist_link = input("Enter YouTube playlist link:")
 p=Playlist(playlist_link)
 playlist_name=p.title
@@ -24,7 +25,7 @@ playlist = Playlist(playlist_link)
 print("Opening", playlist_name)
 
 video_links = Playlist(playlist_link).video_urls
-
+#Functions for downloading from YouTube
 def download_video(url, folder='Videos'):
     yt = YouTube(url)
     video = yt.streams.filter(file_extension='mp4').first()
@@ -38,7 +39,7 @@ def download_audio(url, folder='Music'):
     if not os.path.exists(folder):
         os.makedirs(folder)
     audio.download(folder)
-
+#Function for comparing titles
 def get_similar_titles(title1, title2, link1,link2):
     title1 = re.sub(r'[^\w\s]', '', title1.lower())
     title2 = re.sub(r'[^\w\s]', '', title2.lower())
@@ -49,6 +50,7 @@ video_titles = []
 saved_video_links = []
 invalid_video_links = []
 start = time()
+#reading playlist
 for link in tqdm(video_links):
     try:
         video_title = YouTube(link).title
@@ -66,6 +68,7 @@ for i in tqdm(range(len(video_titles))):
         if similarity >= min_similarity:
             similar_titles.append((video_titles[i], video_titles[j], similarity, saved_video_links[i], saved_video_links[j]))
 print(20*"_")
+#Sorting & saving similar titles
 similar_titles = sorted(similar_titles, key=lambda x: x[2], reverse=True)
 if similar_titles:
     print("Comprising ", len(video_titles), ",", len(invalid_video_links), "title(s) are invalid.")
@@ -78,6 +81,7 @@ if similar_titles:
             file.write(f'{title1} and {title2}, similarity: {similarity:.2f}, {link1}, to {link2}\n')
 else:
     print('No similar titles found.')
+#Saving invalid links
 if len(invalid_video_links) > 0:
     print("Found ", len(invalid_video_links), "invalid video links, saving them to invalid_links.txt")
     with open("Invalid_links.txt", "w", encoding='utf-8') as file:
@@ -87,6 +91,7 @@ if len(invalid_video_links) > 0:
         for i in invalid_video_links:
             file.write(f'{i}\n')
 print(20*"_")
+#Downloading files
 if can_download_video == 1 or can_download_music == 1:
     if can_download_music == 1:
         print("Downloading ", len(saved_video_links), "audio file(s).")
@@ -122,6 +127,7 @@ if can_download_video == 1 or can_download_music == 1:
             for i in wrong_links:
                 print(i)
         print(20 * "_")
+#Saving playlist content
 if backup_playlist == 1:
     print("Creating playlist backup...")
     with open(playlist_save, "w", encoding='utf-8') as file:
