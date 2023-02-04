@@ -9,7 +9,7 @@ Then enter project directory
 In order to make it work, you need [tqdm](https://github.com/tqdm/tqdm) and [Pytube](https://github.com/pytube/pytube).
 You can install them by typing in terminal/cmd
 ```
-pip install pytube && pip install tqdm
+pip install pytube && pip install tqdm && pip install moviepy
 ```
 Then you need to edit `config.ini`.
 
@@ -32,7 +32,6 @@ similar_titles.txt:
 ```
 Titles that are very similar:
 Slendertubbies tutrial - How to host and join LAN server and Slendertubbies tutrial - How to host and join Steam server, similarity: 0.95, https://www.youtube.com/watch?v=BU92f9TOzNI, to https://www.youtube.com/watch?v=apIwgZ7y3Aw
-
 ```
 
 PlaylistBackup.txt
