@@ -2,7 +2,9 @@
 YTPO is a program written with [Pytube](https://github.com/pytube/pytube). This script can list similar video titles, invalid video links, save as .txt what videos are in playlist. YouTube Playlist Organizer can also download videos from playlist and save them as mp3 or mp4.
 ## Setup
 Download `.zip` from GitHub or type 
+
 `git clone https://github.com/seba0456/YouTube-Playlist-Organizer `
+
 Then enter project directory 
 In order to make it work, you need [tqdm](https://github.com/tqdm/tqdm) and [Pytube](https://github.com/pytube/pytube).
 You can install them by typing in terminal/cmd
