@@ -24,3 +24,21 @@ You can run the program by opening CMD or Terminal and typing this command:
 
 Program will ask for playlist link, valid link looks like this `https://www.youtube.com/playlist?list=PLuoflVrROeM3MLY-78dZTsWnkZWextssm`. Then you have to wait for the program to finish its job. 
 `.txt` can be found in program directory, `.mp3` files inside `Music` folder, `.mp4` files inside `Videos`. These folders are available in program directory.
+## TXT files example
+similar_titles.txt:
+
+```
+Titles that are very similar:
+Slendertubbies tutrial - How to host and join LAN server and Slendertubbies tutrial - How to host and join Steam server, similarity: 0.95, https://www.youtube.com/watch?v=BU92f9TOzNI, to https://www.youtube.com/watch?v=apIwgZ7y3Aw
+
+```
+
+PlaylistBackup.txt
+
+```
+Videos in playlist:
+Slendertubbies tutrial - How to install Slendertubbies from Gamejolt?     https://www.youtube.com/watch?v=0INaIXDHMBE
+Slendertubbies tutrial - How to host and join LAN server     https://www.youtube.com/watch?v=BU92f9TOzNI
+How to Install Steam on Windows 10     https://www.youtube.com/watch?v=zX6eh5615bE
+Slendertubbies tutrial - How to host and join Steam server     https://www.youtube.com/watch?v=apIwgZ7y3Aw
+```
