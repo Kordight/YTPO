@@ -102,7 +102,7 @@ if can_download_video == 1 or can_download_music == 1:
                 download_audio(i)
                 downloaded_files += 1
             except:
-                print("bug")
+                wrong_links.append(i)
                 continue
         print("Downloaded ", downloaded_files, "file(s).")
         if len(saved_video_links) != downloaded_files:
