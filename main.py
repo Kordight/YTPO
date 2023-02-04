@@ -38,7 +38,10 @@ def download_audio(url, folder='Music'):
     audio = yt.streams.filter(only_audio=True).first()
     if not os.path.exists(folder):
         os.makedirs(folder)
-    audio.download(folder)
+    out_file = audio.download(output_path=folder)
+    base, ext = os.path.splitext(out_file)
+    new_file = base + '.mp3'
+    os.rename(out_file, new_file)
 #Function for comparing titles
 def get_similar_titles(title1, title2, link1,link2):
     title1 = re.sub(r'[^\w\s]', '', title1.lower())
@@ -101,14 +104,15 @@ if can_download_video == 1 or can_download_music == 1:
             try:
                 download_audio(i)
                 downloaded_files += 1
-            except:
-                wrong_links.append(i)
+            except Exception as e: 
+                print(e)
+                wrong_links.append((i, str(e)))
                 continue
         print("Downloaded ", downloaded_files, "file(s).")
         if len(saved_video_links) != downloaded_files:
             print("Couldn't download ", len(saved_video_links) - downloaded_files, "file(s).")
             for i in wrong_links:
-                print(i)
+                print(i, " : ", reason)
         print(20 * "_")
     if can_download_video == 1:
         print("Downloading ", len(saved_video_links), "video file(s).")
@@ -119,13 +123,13 @@ if can_download_video == 1 or can_download_music == 1:
                 download_video(i)
                 downloaded_files+=1
             except:
-                wrong_links.append(i)
+                wrong_links.append((i, str(e)))
                 continue
         print("Downloaded ", downloaded_files, "file(s).")
         if len(saved_video_links) != downloaded_files:
             print("Couldn't download ", len(saved_video_links)-downloaded_files, "file(s).")
             for i in wrong_links:
-                print(i)
+                print(i, " : ", reason)
         print(20 * "_")
 #Saving playlist content
 if backup_playlist == 1:
