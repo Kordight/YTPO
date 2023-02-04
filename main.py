@@ -129,7 +129,7 @@ if backup_playlist == 1:
         file.truncate()
         file.write("Videos in playlist:\n")
         for saved_video_links, video_titles in zip(saved_video_links, video_titles):
-            file.write(video_title + (5 * " ") + saved_video_links + "\n")
+            file.write(video_titles + (5 * " ") + saved_video_links + "\n")
 
 
 
