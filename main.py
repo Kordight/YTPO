@@ -140,4 +140,4 @@ if backup_playlist == 1:
 
 
 print("Done.")
-os.system('pause')
+input("Press Enter to continue...")
