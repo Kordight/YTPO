@@ -3,9 +3,13 @@ import os
 import difflib
 from time import time
 from pytube import YouTube, Playlist
+from moviepy.editor import *
+from moviepy.video.io.VideoFileClip import VideoFileClip
 from tqdm import tqdm
 import configparser
+import time
 from datetime import datetime
+
 
 today = datetime.today().strftime("%Y-%m-%d")
 
@@ -25,23 +29,49 @@ playlist = Playlist(playlist_link)
 print("Opening", playlist_name)
 
 video_links = Playlist(playlist_link).video_urls
+
+def uniquify(path):
+    filename, extension = os.path.splitext(path)
+    counter = 1
+
+    while os.path.exists(path):
+
+        path = filename + " (" + str(counter) + ")"
+        counter += 1
+
+    return os.path.splitext(path)[0]
+
 #Functions for downloading from YouTube
 def download_video(url, folder='Videos'):
     yt = YouTube(url)
     video = yt.streams.filter(file_extension='mp4').first()
     if not os.path.exists(folder):
         os.makedirs(folder)
-    video.download(folder)
+    i = 1
+    file_name = video.default_filename
+    path_mp4 = os.path.join(folder, file_name)
+    video.download(output_path="", filename=uniquify(path_mp4)+'.mp4')
 
 def download_audio(url, folder='Music'):
     yt = YouTube(url)
-    audio = yt.streams.filter(only_audio=True).first()
+    audio = yt.streams.filter(file_extension='mp4').first()
     if not os.path.exists(folder):
         os.makedirs(folder)
-    out_file = audio.download(output_path=folder)
-    base, ext = os.path.splitext(out_file)
-    new_file = base + '.mp3'
-    os.rename(out_file, new_file)
+    file_name = audio.default_filename
+    path_mp3 = os.path.join(folder, file_name.replace("temp_", "").replace(".mp4", "") + '.mp3')
+    filename, extension = os.path.splitext(path_mp3)
+    i = 1
+    while os.path.exists(path_mp3):
+        path_mp3 = filename  + " (" + str(i) + ")" + extension
+        i += 1
+        
+    audio.download(folder, filename=file_name)
+    video = VideoFileClip(os.path.join(folder, file_name))
+    video.audio.write_audiofile(os.path.join(path_mp3),verbose=False)
+    video.close()
+    video= None
+    os.remove(os.path.join(folder, file_name))
+    
 #Function for comparing titles
 def get_similar_titles(title1, title2, link1,link2):
     title1 = re.sub(r'[^\w\s]', '', title1.lower())
@@ -52,7 +82,7 @@ def get_similar_titles(title1, title2, link1,link2):
 video_titles = []
 saved_video_links = []
 invalid_video_links = []
-start = time()
+start = time.time()
 #reading playlist
 for link in tqdm(video_links):
     try:
@@ -62,7 +92,7 @@ for link in tqdm(video_links):
     except Exception as e:
         invalid_video_links.append(link)
 
-print(f'Time taken: {time() - start}')
+print(f'Time taken: {time.time() - start}')
 print("Comparing titles...")
 similar_titles = []
 for i in tqdm(range(len(video_titles))):
@@ -110,8 +140,8 @@ if can_download_video == 1 or can_download_music == 1:
         print("Downloaded ", downloaded_files, "file(s).")
         if len(saved_video_links) != downloaded_files:
             print("Couldn't download ", len(saved_video_links) - downloaded_files, "file(s).")
-            for i in wrong_links:
-                print(i, " : ", reason)
+            for link, reason in wrong_links:
+                print(link, " : ", reason)
         print(20 * "_")
     if can_download_video == 1:
         print("Downloading ", len(saved_video_links), "video file(s).")
@@ -121,14 +151,14 @@ if can_download_video == 1 or can_download_music == 1:
             try:
                 download_video(i)
                 downloaded_files+=1
-            except:
+            except Exception as e:
                 wrong_links.append((i, str(e)))
                 continue
         print("Downloaded ", downloaded_files, "file(s).")
         if len(saved_video_links) != downloaded_files:
             print("Couldn't download ", len(saved_video_links)-downloaded_files, "file(s).")
-            for i in wrong_links:
-                print(i, " : ", reason)
+            for link, reason in wrong_links:
+                print(link, " : ", reason)
         print(20 * "_")
 #Saving playlist content
 if backup_playlist == 1:
