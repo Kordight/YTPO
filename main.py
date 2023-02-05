@@ -90,7 +90,7 @@ for link in tqdm(video_links):
         video_titles.append(video_title)
         saved_video_links.append(link)
     except Exception as e:
-        invalid_video_links.append(link)
+        invalid_video_links.append((link, str(e)))
 
 print(f'Time taken: {time.time() - start}')
 print("Comparing titles...")
@@ -120,9 +120,9 @@ if len(invalid_video_links) > 0:
     with open("Invalid_links.txt", "w", encoding='utf-8') as file:
         file.seek(0)
         file.truncate()
-        file.write("Titles that are very similar:\n")
-        for i in invalid_video_links:
-            file.write(f'{i}\n')
+        file.write("Links that are invalid:\n")
+        for i, reason in invalid_video_links:
+            file.write(i, " : ", reason)
 print(20*"_")
 #Downloading files
 if can_download_video == 1 or can_download_music == 1:
