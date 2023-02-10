@@ -24,7 +24,8 @@ def open_file(path):
     print("Opening " + str(path))
     logging.debug('Opening '+path)
 today = datetime.today().strftime("%Y-%m-%d")
-logging.basicConfig(filename=today+"_"+gen_random_hex_string(6)+'_YTPO.log', encoding='utf-8', level=logging.DEBUG)
+session = gen_random_hex_string(6)
+logging.basicConfig(filename=today+"_"+session+'_YTPO.log', encoding='utf-8', level=logging.DEBUG)
 #Reading variables from .ini
 logging.debug('Reading data from ini...')
 config = configparser.ConfigParser()
@@ -38,6 +39,7 @@ logging.debug('can_download_music is: '+str(can_download_music))
 backup_playlist=int(config.get('main', 'backup_playlist'))
 logging.debug('backup_playlist is: '+str(backup_playlist))
 print("YTPO by Sebastian Legieziński (seba0456)")
+print("Session ID: "+session)
 playlist_link = input("Enter YouTube playlist link:")
 p=Playlist(playlist_link)
 playlist_name=p.title
