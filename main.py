@@ -1,7 +1,5 @@
 import re
-import os
 import difflib
-from time import time
 from pytube import YouTube, Playlist
 from moviepy.editor import *
 from moviepy.video.io.VideoFileClip import VideoFileClip
@@ -9,25 +7,44 @@ from tqdm import tqdm
 import configparser
 import time
 from datetime import datetime
-
-
+import logging
+import random
+import os
+import platform
+import subprocess
+def gen_random_hex_string(size):
+    return ''.join(random.choices('0123456789abcdef', k=size))
+def open_file(path):
+    if platform.system() == "Windows":
+        os.startfile(path)
+    elif platform.system() == "Darwin":
+        subprocess.Popen(["open", path])
+    else:
+        subprocess.Popen(["xdg-open", path])
+    print("Opening " + str(path))
+    logging.debug('Opening '+path)
 today = datetime.today().strftime("%Y-%m-%d")
-
+logging.basicConfig(filename=today+"_"+gen_random_hex_string(6)+'_YTPO.log', encoding='utf-8', level=logging.DEBUG)
 #Reading variables from .ini
+logging.debug('Reading data from ini...')
 config = configparser.ConfigParser()
 config.read('config.ini')
 min_similarity = float(config.get('main', 'min_similarity'))
+logging.debug('min_similarity is: '+str(min_similarity))
 can_download_video=int(config.get('main', 'download_video'))
+logging.debug('can_download_video is: '+str(can_download_video))
 can_download_music=int(config.get('main', 'download_music'))
+logging.debug('can_download_music is: '+str(can_download_music))
 backup_playlist=int(config.get('main', 'backup_playlist'))
-
+logging.debug('backup_playlist is: '+str(backup_playlist))
+print("YTPO by Sebastian Legieziński (seba0456)")
 playlist_link = input("Enter YouTube playlist link:")
 p=Playlist(playlist_link)
 playlist_name=p.title
 playlist_save = f"{playlist_name}_{today}.txt"
 playlist = Playlist(playlist_link)
 print("Opening", playlist_name)
-
+logging.info('Playlist is: ' + playlist_link + '. Playlist name is: '+playlist_name)
 video_links = Playlist(playlist_link).video_urls
 
 def uniquify(path):
@@ -91,6 +108,7 @@ for link in tqdm(video_links):
         saved_video_links.append(link)
     except Exception as e:
         invalid_video_links.append((link, str(e)))
+        logging.error("Invalid link: "+link + " -- "+ e)
 
 print(f'Time taken: {time.time() - start}')
 print("Comparing titles...")
@@ -102,6 +120,7 @@ for i in tqdm(range(len(video_titles))):
             similar_titles.append((video_titles[i], video_titles[j], similarity, saved_video_links[i], saved_video_links[j]))
 print(20*"_")
 #Sorting & saving similar titles
+logging.info('Running get_similar_titles')
 similar_titles = sorted(similar_titles, key=lambda x: x[2], reverse=True)
 if similar_titles:
     print("Comprising ", len(video_titles), ",", len(invalid_video_links), "title(s) are invalid.")
@@ -134,8 +153,10 @@ if can_download_video == 1 or can_download_music == 1:
             try:
                 download_audio(i)
                 downloaded_files += 1
+                logging.info("Downloaded audio: "+i)
             except Exception as e: 
                 wrong_links.append((i, str(e)))
+                logging.error("Can't download: "+i + " -- " + e)
                 continue
         print("Downloaded ", downloaded_files, "file(s).")
         if len(saved_video_links) != downloaded_files:
@@ -143,6 +164,7 @@ if can_download_video == 1 or can_download_music == 1:
             for link, reason in wrong_links:
                 print(link, " : ", reason)
         print(20 * "_")
+        open_file("Music")
     if can_download_video == 1:
         print("Downloading ", len(saved_video_links), "video file(s).")
         downloaded_files=0
@@ -151,26 +173,27 @@ if can_download_video == 1 or can_download_music == 1:
             try:
                 download_video(i)
                 downloaded_files+=1
+                logging.info("Downloaded video: " + i)
             except Exception as e:
                 wrong_links.append((i, str(e)))
+                logging.error("Can't download: " + i + " -- " + e)
                 continue
         print("Downloaded ", downloaded_files, "file(s).")
         if len(saved_video_links) != downloaded_files:
             print("Couldn't download ", len(saved_video_links)-downloaded_files, "file(s).")
             for link, reason in wrong_links:
                 print(link, " : ", reason)
+        open_file("Video")
         print(20 * "_")
 #Saving playlist content
 if backup_playlist == 1:
     print("Creating playlist backup...")
+    logging.info('Creating playlist backup...')
     with open(playlist_save, "w", encoding='utf-8') as file:
         file.seek(0)
         file.truncate()
         file.write("Videos in playlist:\n")
         for saved_video_links, video_titles in zip(saved_video_links, video_titles):
             file.write(video_titles + (5 * " ") + saved_video_links + "\n")
-
-
-
 print("Done.")
 input("Press Enter to continue...")
