@@ -110,7 +110,7 @@ for link in tqdm(video_links):
         saved_video_links.append(link)
     except Exception as e:
         invalid_video_links.append((link, str(e)))
-        logging.error("Invalid link: "+link + " -- "+ e)
+        logging.error("Invalid link: "+link + " -- "+ str(e))
 
 print(f'Time taken: {time.time() - start}')
 print("Comparing titles...")
@@ -143,7 +143,8 @@ if len(invalid_video_links) > 0:
         file.truncate()
         file.write("Links that are invalid:\n")
         for i, reason in invalid_video_links:
-            file.write(i, " : ", reason)
+            invalid_video_link=i+ " : "+ reason
+            file.write(invalid_video_link)
 print(20*"_")
 #Downloading files
 if can_download_video == 1 or can_download_music == 1:
@@ -158,7 +159,7 @@ if can_download_video == 1 or can_download_music == 1:
                 logging.info("Downloaded audio: "+i)
             except Exception as e: 
                 wrong_links.append((i, str(e)))
-                logging.error("Can't download: "+i + " -- " + e)
+                logging.error("Can't download: "+i + " -- " + str(e))
                 continue
         print("Downloaded ", downloaded_files, "file(s).")
         if len(saved_video_links) != downloaded_files:
@@ -178,7 +179,7 @@ if can_download_video == 1 or can_download_music == 1:
                 logging.info("Downloaded video: " + i)
             except Exception as e:
                 wrong_links.append((i, str(e)))
-                logging.error("Can't download: " + i + " -- " + e)
+                logging.error("Can't download: " + i + " -- " + str(e))
                 continue
         print("Downloaded ", downloaded_files, "file(s).")
         if len(saved_video_links) != downloaded_files:
