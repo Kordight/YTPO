@@ -38,6 +38,8 @@ can_download_music=int(config.get('main', 'download_music'))
 logging.debug('can_download_music is: '+str(can_download_music))
 backup_playlist=int(config.get('main', 'backup_playlist'))
 logging.debug('backup_playlist is: '+str(backup_playlist))
+download_wav=int(config.get('main', 'download_wav'))
+logging.debug('download_wav is: '+str(backup_playlist))
 print("YTPO by Sebastian Legieziński (seba0456)")
 print("Session ID: "+session)
 playlist_link = input("Enter YouTube playlist link:")
@@ -90,7 +92,27 @@ def download_audio(url, folder='Music'):
     video.close()
     video= None
     os.remove(os.path.join(folder, file_name))
-    
+
+def download_audio_wav(url, folder='Music'):
+    yt = YouTube(url)
+    audio = yt.streams.filter(file_extension='mp4').first()
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    file_name = audio.default_filename
+    path_mp3 = os.path.join(folder, file_name.replace("temp_", "").replace(".mp4", "") + '.wav')
+    filename, extension = os.path.splitext(path_mp3)
+    i = 1
+    while os.path.exists(path_mp3):
+        path_mp3 = filename  + " (" + str(i) + ")" + extension
+        i += 1
+        
+    audio.download(folder, filename=file_name)
+    video = VideoFileClip(os.path.join(folder, file_name))
+    video.audio.write_audiofile(os.path.join(path_mp3),verbose=False)
+    video.close()
+    video= None
+    os.remove(os.path.join(folder, file_name))
+
 #Function for comparing titles
 def get_similar_titles(title1, title2, link1,link2):
     title1 = re.sub(r'[^\w\s]', '', title1.lower())
@@ -144,7 +166,7 @@ if len(invalid_video_links) > 0:
         file.write("Links that are invalid:\n")
         for i, reason in invalid_video_links:
             invalid_video_link=i+ " : "+ reason
-            file.write(invalid_video_link)
+            file.write(invalid_video_link+"\n")
 print(20*"_")
 #Downloading files
 if can_download_video == 1 or can_download_music == 1:
@@ -154,7 +176,11 @@ if can_download_video == 1 or can_download_music == 1:
         wrong_links = []
         for i in tqdm(saved_video_links):
             try:
-                download_audio(i)
+                if download_wav == 0:
+                    download_audio(i)
+                elif download_wav == 1:
+                    download_audio_wav(i)
+                    print("Downloaded wav")
                 downloaded_files += 1
                 logging.info("Downloaded audio: "+i)
             except Exception as e: 
