@@ -1,3 +1,4 @@
+#Import libraries
 import re
 import difflib
 from pytube import YouTube, Playlist
@@ -12,8 +13,10 @@ import random
 import os
 import platform
 import subprocess
+#Get session ID
 def gen_random_hex_string(size):
     return ''.join(random.choices('0123456789abcdef', k=size))
+#Open file
 def open_file(path):
     if platform.system() == "Windows":
         os.startfile(path)
@@ -23,6 +26,7 @@ def open_file(path):
         subprocess.Popen(["xdg-open", path])
     print("Opening " + str(path))
     logging.debug('Opening '+path)
+
 today = datetime.today().strftime("%Y-%m-%d")
 session = gen_random_hex_string(6)
 logging.basicConfig(filename=today+"_"+session+'_YTPO.log', encoding='utf-8', level=logging.DEBUG)
@@ -50,7 +54,7 @@ playlist = Playlist(playlist_link)
 print("Opening", playlist_name)
 logging.info('Playlist is: ' + playlist_link + '. Playlist name is: '+playlist_name)
 video_links = Playlist(playlist_link).video_urls
-
+#Unique filename
 def uniquify(path):
     filename, extension = os.path.splitext(path)
     counter = 1
@@ -73,33 +77,13 @@ def download_video(url, folder='Videos'):
     path_mp4 = os.path.join(folder, file_name)
     video.download(output_path="", filename=uniquify(path_mp4)+'.mp4')
 
-def download_audio(url, folder='Music'):
+def download_audio(url, con_extension, folder='Music'):
     yt = YouTube(url)
     audio = yt.streams.filter(file_extension='mp4').first()
     if not os.path.exists(folder):
         os.makedirs(folder)
     file_name = audio.default_filename
-    path_mp3 = os.path.join(folder, file_name.replace("temp_", "").replace(".mp4", "") + '.mp3')
-    filename, extension = os.path.splitext(path_mp3)
-    i = 1
-    while os.path.exists(path_mp3):
-        path_mp3 = filename  + " (" + str(i) + ")" + extension
-        i += 1
-        
-    audio.download(folder, filename=file_name)
-    video = VideoFileClip(os.path.join(folder, file_name))
-    video.audio.write_audiofile(os.path.join(path_mp3),verbose=False)
-    video.close()
-    video= None
-    os.remove(os.path.join(folder, file_name))
-
-def download_audio_wav(url, folder='Music'):
-    yt = YouTube(url)
-    audio = yt.streams.filter(file_extension='mp4').first()
-    if not os.path.exists(folder):
-        os.makedirs(folder)
-    file_name = audio.default_filename
-    path_mp3 = os.path.join(folder, file_name.replace("temp_", "").replace(".mp4", "") + '.wav')
+    path_mp3 = os.path.join(folder, file_name.replace("temp_", "").replace(".mp4", "") + str(con_extension))
     filename, extension = os.path.splitext(path_mp3)
     i = 1
     while os.path.exists(path_mp3):
@@ -177,9 +161,9 @@ if can_download_video == 1 or can_download_music == 1:
         for i in tqdm(saved_video_links):
             try:
                 if download_wav == 0:
-                    download_audio(i)
+                    download_audio(i, con_extension=".mp3")
                 elif download_wav == 1:
-                    download_audio_wav(i)
+                    download_audio(i, con_extension=".wav")
                     print("Downloaded wav")
                 downloaded_files += 1
                 logging.info("Downloaded audio: "+i)
