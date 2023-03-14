@@ -31,7 +31,7 @@ create_folder_if_none("Logs")
 create_folder_if_none("Output")
 
 today = datetime.today().strftime("%H-%M_%Y-%m-%d")
-logging.basicConfig(filename='logs/'+today+'_YTPO.log', encoding='utf-8', level=logging.DEBUG)
+logging.basicConfig(filename='Logs/'+today+'_YTPO.log', encoding='utf-8', level=logging.DEBUG)
 print("The log file is known as:",today+'_YTPO.log')
 #Reading variables from .ini
 logging.debug('Reading data from ini...')
