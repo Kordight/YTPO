@@ -9,13 +9,9 @@ import configparser
 import time
 from datetime import datetime
 import logging
-import random
 import os
 import platform
 import subprocess
-#Get session ID
-def gen_random_hex_string(size):
-    return ''.join(random.choices('0123456789abcdef', k=size))
 #Open file
 def open_file(path):
     if platform.system() == "Windows":
@@ -27,9 +23,9 @@ def open_file(path):
     print("Opening " + str(path))
     logging.debug('Opening '+path)
 
-today = datetime.today().strftime("%Y-%m-%d")
-session = gen_random_hex_string(6)
-logging.basicConfig(filename=today+"_"+session+'_YTPO.log', encoding='utf-8', level=logging.DEBUG)
+today = datetime.today().strftime("%H-%M_%Y-%m-%d")
+logging.basicConfig(filename=today+'_YTPO.log', encoding='utf-8', level=logging.DEBUG)
+print("The log file is known as:",today+'_YTPO.log')
 #Reading variables from .ini
 logging.debug('Reading data from ini...')
 config = configparser.ConfigParser()
@@ -45,7 +41,6 @@ logging.debug('backup_playlist is: '+str(backup_playlist))
 download_wav=int(config.get('main', 'download_wav'))
 logging.debug('download_wav is: '+str(backup_playlist))
 print("YTPO by Sebastian Legieziński (seba0456)")
-print("Session ID: "+session)
 playlist_link = input("Enter YouTube playlist link:")
 p=Playlist(playlist_link)
 playlist_name=p.title
@@ -208,5 +203,6 @@ if backup_playlist == 1:
         file.write("Videos in playlist:\n")
         for saved_video_links, video_titles in zip(saved_video_links, video_titles):
             file.write(video_titles + (5 * " ") + saved_video_links + "\n")
+
 print("Done.")
 input("Press Enter to continue...")
