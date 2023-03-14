@@ -23,8 +23,15 @@ def open_file(path):
     print("Opening " + str(path))
     logging.debug('Opening '+path)
 
+def create_folder_if_none(patch):
+    if not os.path.exists(patch):
+        os.makedirs(patch)
+
+create_folder_if_none("Logs")
+create_folder_if_none("Output")
+
 today = datetime.today().strftime("%H-%M_%Y-%m-%d")
-logging.basicConfig(filename=today+'_YTPO.log', encoding='utf-8', level=logging.DEBUG)
+logging.basicConfig(filename='logs/'+today+'_YTPO.log', encoding='utf-8', level=logging.DEBUG)
 print("The log file is known as:",today+'_YTPO.log')
 #Reading variables from .ini
 logging.debug('Reading data from ini...')
@@ -49,6 +56,9 @@ playlist = Playlist(playlist_link)
 print("Opening", playlist_name)
 logging.info('Playlist is: ' + playlist_link + '. Playlist name is: '+playlist_name)
 video_links = Playlist(playlist_link).video_urls
+
+create_folder_if_none("Output/"+playlist_name)
+
 #Unique filename
 def uniquify(path):
     filename, extension = os.path.splitext(path)
@@ -62,7 +72,7 @@ def uniquify(path):
     return os.path.splitext(path)[0]
 
 #Functions for downloading from YouTube
-def download_video(url, folder='Videos'):
+def download_video(url, folder="Output/"+playlist_name+'/Videos'):
     yt = YouTube(url)
     video = yt.streams.filter(file_extension='mp4').first()
     if not os.path.exists(folder):
@@ -72,7 +82,7 @@ def download_video(url, folder='Videos'):
     path_mp4 = os.path.join(folder, file_name)
     video.download(output_path="", filename=uniquify(path_mp4)+'.mp4')
 
-def download_audio(url, con_extension, folder='Music'):
+def download_audio(url, con_extension, folder="Output/"+playlist_name+'/Music'):
     yt = YouTube(url)
     audio = yt.streams.filter(file_extension='mp4').first()
     if not os.path.exists(folder):
@@ -128,7 +138,7 @@ similar_titles = sorted(similar_titles, key=lambda x: x[2], reverse=True)
 if similar_titles:
     print("Comprising ", len(video_titles), ",", len(invalid_video_links), "title(s) are invalid.")
     print("Found ", len(similar_titles), "similar tiles, saving them to similar_titles.txt")
-    with open("similar_titles.txt", "w", encoding='utf-8') as file:
+    with open("Output/"+playlist_name+"/similar_titles.txt", "w", encoding='utf-8') as file:
         file.seek(0)
         file.truncate()
         file.write("Titles that are very similar:\n")
@@ -139,7 +149,7 @@ else:
 #Saving invalid links
 if len(invalid_video_links) > 0:
     print("Found ", len(invalid_video_links), "invalid video links, saving them to invalid_links.txt")
-    with open("Invalid_links.txt", "w", encoding='utf-8') as file:
+    with open("Output/"+playlist_name+"/Invalid_links.txt", "w", encoding='utf-8') as file:
         file.seek(0)
         file.truncate()
         file.write("Links that are invalid:\n")
@@ -172,7 +182,7 @@ if can_download_video == 1 or can_download_music == 1:
             for link, reason in wrong_links:
                 print(link, " : ", reason)
         print(20 * "_")
-        open_file("Music")
+        open_file("Output/"+playlist_name+"\Music")
     if can_download_video == 1:
         print("Downloading ", len(saved_video_links), "video file(s).")
         downloaded_files=0
@@ -191,13 +201,13 @@ if can_download_video == 1 or can_download_music == 1:
             print("Couldn't download ", len(saved_video_links)-downloaded_files, "file(s).")
             for link, reason in wrong_links:
                 print(link, " : ", reason)
-        open_file("Video")
+        open_file("Output/"+playlist_name+"\Videos")
         print(20 * "_")
 #Saving playlist content
 if backup_playlist == 1:
     print("Creating playlist backup...")
     logging.info('Creating playlist backup...')
-    with open(playlist_save, "w", encoding='utf-8') as file:
+    with open("Output/"+playlist_name+"/"+playlist_save, "w", encoding='utf-8') as file:
         file.seek(0)
         file.truncate()
         file.write("Videos in playlist:\n")
