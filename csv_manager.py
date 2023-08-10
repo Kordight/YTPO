@@ -1,4 +1,3 @@
-#This module will be used to save reports to csv.
 import csv
 
 def save_similar_titles_to_csv(file_path, similar_titles):
