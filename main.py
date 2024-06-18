@@ -253,4 +253,4 @@ if backup_playlist == 1:
         with open(f"Output/{playlist_name}/{today}_playlist_backup.html", "w", encoding="utf-8") as outfile:
             outfile.write(final_html)
 print("Done.")
-input("Press Enter to continue...")
+#input("Press Enter to continue...")
