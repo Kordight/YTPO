@@ -14,3 +14,9 @@ def save_invalid_links_to_csv(file_path, invalid_links):
         csv_writer.writerow(['Link', 'Reason'])
         for link, reason in invalid_links:
             csv_writer.writerow([link, reason])
+def save_playlist_to_csv(file_path, saved_video_links, video_titles):
+    with open(file_path, 'w', newline='', encoding='utf-8') as csv_file:
+        csv_writer = csv.writer(csv_file)
+        csv_writer.writerow(['Title', 'Link'])
+        for link, title in zip(saved_video_links, video_titles):
+            csv_writer.writerow([title, link])
