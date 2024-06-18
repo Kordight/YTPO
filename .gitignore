@@ -1,0 +1,4 @@
+# Ignore Output directory 
+Output/*
+# Ignore Logs directory
+Logs/*

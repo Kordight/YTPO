@@ -12,6 +12,7 @@ import logging
 import os
 import platform
 import subprocess
+from csv_manager import save_similar_titles_to_csv
 #Open file
 def open_file(path):
     if platform.system() == "Windows":
@@ -46,7 +47,9 @@ logging.debug('can_download_music is: '+str(can_download_music))
 backup_playlist=int(config.get('main', 'backup_playlist'))
 logging.debug('backup_playlist is: '+str(backup_playlist))
 download_wav=int(config.get('main', 'download_wav'))
-logging.debug('download_wav is: '+str(backup_playlist))
+logging.debug('download_wav is: '+str(download_wav))
+use_csv=int(config.get('main','use_csv_file'))
+logging.debug('download_wav is: '+str(use_csv))
 print("YTPO by Sebastian Legieziński (seba0456)")
 playlist_link = input("Enter YouTube playlist link:")
 p=Playlist(playlist_link)
@@ -135,15 +138,22 @@ print(20*"_")
 #Sorting & saving similar titles
 logging.info('Running get_similar_titles')
 similar_titles = sorted(similar_titles, key=lambda x: x[2], reverse=True)
+
 if similar_titles:
     print("Comprising ", len(video_titles), ",", len(invalid_video_links), "title(s) are invalid.")
-    print("Found ", len(similar_titles), "similar tiles, saving them to similar_titles.txt")
-    with open("Output/"+playlist_name+"/similar_titles.txt", "w", encoding='utf-8') as file:
-        file.seek(0)
-        file.truncate()
-        file.write("Titles that are very similar:\n")
-        for title1, title2, similarity, link1, link2 in similar_titles:
-            file.write(f'{title1} and {title2}, similarity: {similarity:.2f}, {link1}, to {link2}\n')
+    if use_csv ==0:
+        logging.info('Saving similar titles to .txt')
+        print("Found ", len(similar_titles), "similar tiles, saving them to similar_titles.txt")
+        with open("Output/"+playlist_name+"/similar_titles.txt", "w", encoding='utf-8') as file:
+            file.seek(0)
+            file.truncate()
+            file.write("Titles that are very similar:\n")
+            for title1, title2, similarity, link1, link2 in similar_titles:
+                file.write(f'{title1} and {title2}, similarity: {similarity:.2f}, {link1}, to {link2}\n')
+    else:
+        print("Found ", len(similar_titles), "similar tiles, saving them to similar_titles.csv")
+        logging.info('Saving similar titles to .csv')
+        save_similar_titles_to_csv("Output/"+playlist_name+"/similar_titles.csv", similar_titles)     
 else:
     print('No similar titles found.')
 #Saving invalid links
