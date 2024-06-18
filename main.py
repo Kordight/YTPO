@@ -15,6 +15,7 @@ import subprocess
 import argparse
 from csv_manager import save_similar_titles_to_csv, save_playlist_to_csv, read_duplicate_songs_from_csv, read_songs_from_csv
 from html_manager import extract_head_and_body, read_html_template, generate_html_duplicate_list, generate_html_list
+import difflib
 
 # Define functions
 def open_file(path):
@@ -64,7 +65,7 @@ def get_similar_titles(title1, title2):
     title1_clean = re.sub(r'[^\w\s]', '', title1.lower())
     title2_clean = re.sub(r'[^\w\s]', '', title2.lower())
     ratio = difflib.SequenceMatcher(None, title1_clean, title2_clean).ratio()
-    return ratio
+    return round(ratio, 2)
 
 # Set up logging and configuration
 create_folder_if_none("Logs")
@@ -138,13 +139,15 @@ if similar_titles:
             for title1, title2, similarity, link1, link2 in similar_titles:
                 file.write(f'{title1} and {title2}, similarity: {similarity:.2f}, {link1}, to {link2}\n')
     else:
-        logging.info('Saving similar titles to .csv')
+        logging.info('Saving similar titles to .csv...')
+        print("Saving similar titles to .csv...")
         save_similar_titles_to_csv(f"Output/{playlist_name}/similar_titles.csv", similar_titles)
         # Load .css content
         css_file_path = 'web_template/style_template.css'  
         with open(css_file_path, 'r', encoding='utf-8') as css_file:
             css_styles = css_file.read()
-        # Read data from CSV file
+        logging.info('Saving similar titles to .html (This may take a while)...')
+        print("Saving similar titles to .html (This may take a while)...")
         songs = read_duplicate_songs_from_csv(f"Output/{playlist_name}/similar_titles.csv")  
         # Generate HTML content
         html_list = generate_html_duplicate_list(songs,playlist_name,playlist_link)
@@ -230,6 +233,8 @@ if backup_playlist == 1:
         css_file_path = 'web_template/style_template.css'  
         with open(css_file_path, 'r', encoding='utf-8') as css_file:
             css_styles = css_file.read()
+        logging.info('Saving playlist report to .html (This may take a while)...')
+        print("Saving playlist report to .html (This may take a while)...")
         # Read data from CSV file
         songs = read_songs_from_csv(f"Output/{playlist_name}/{playlist_save_csv}")  
         # Generate HTML content
