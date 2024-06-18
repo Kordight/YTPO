@@ -20,3 +20,23 @@ def save_playlist_to_csv(file_path, saved_video_links, video_titles):
         csv_writer.writerow(['Title', 'Link'])
         for link, title in zip(saved_video_links, video_titles):
             csv_writer.writerow([title, link])
+# Define the data structure for a song
+class Song:
+    def __init__(self, title, url, similarity=None):
+        self.title = title
+        self.url = url
+        self.similarity = similarity
+
+# Function to read data from CSV file and create a list of Song objects
+def read_songs_from_csv(filename):
+    songs = []
+    with open(filename, 'r', encoding='utf-8') as csvfile:
+        reader = csv.reader(csvfile)
+        next(reader)  # Skip header row
+        for row in reader:
+            title1, title2, similarity, url1, url2 = row
+            song1 = Song(title1.strip(), url1.strip())
+            song2 = Song(title2.strip(), url2.strip(), similarity.strip())
+            songs.append((song1, song2))
+    return songs
+
