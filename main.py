@@ -12,8 +12,8 @@ import logging
 import os
 import platform
 import subprocess
-from csv_manager import save_similar_titles_to_csv, save_playlist_to_csv, read_songs_from_csv
-from html_manager import extract_head_and_body, read_html_template, generate_html_list
+from csv_manager import save_similar_titles_to_csv, save_playlist_to_csv, read_duplicate_songs_from_csv, read_songs_from_csv
+from html_manager import extract_head_and_body, read_html_template, generate_html_duplicate_list, generate_html_list
 
 # Define functions
 def open_file(path):
@@ -140,9 +140,9 @@ if similar_titles:
         with open(css_file_path, 'r', encoding='utf-8') as css_file:
             css_styles = css_file.read()
         # Read data from CSV file
-        songs = read_songs_from_csv(f"Output/{playlist_name}/similar_titles.csv")  
+        songs = read_duplicate_songs_from_csv(f"Output/{playlist_name}/similar_titles.csv")  
         # Generate HTML content
-        html_list = generate_html_list(songs)
+        html_list = generate_html_duplicate_list(songs)
         # Read HTML template
         html_template = read_html_template('web_template/html_template_similar_report.html')
         # Extract head and body from HTML template
@@ -152,7 +152,7 @@ if similar_titles:
         # Combine everything into a complete HTML structure with custom page title and CSS styles
         final_html = f"<html><head><title>{page_title}</title>{head}<style>{css_styles}</style></head><body>{body}{html_list}<footer><h3>Authors:</h3><div class='links'><a href='https://github.com/seba0456'><strong>seba0456/Kordight</strong></a></div></footer></body></html>"
         # Write final HTML to file
-        with open(f"Output/{playlist_name}/similar_songs.html", "w", encoding="utf-8") as outfile:
+        with open(f"Output/{playlist_name}/similar_videos.html", "w", encoding="utf-8") as outfile:
             outfile.write(final_html)
 
 else:
@@ -221,5 +221,26 @@ if backup_playlist == 1:
     else:
         save_playlist_to_csv(f"Output/{playlist_name}/{playlist_save_csv}", saved_video_links, video_titles)
 
+        # Load .css content
+        css_file_path = 'web_template/style_template.css'  
+        with open(css_file_path, 'r', encoding='utf-8') as css_file:
+            css_styles = css_file.read()
+        # Read data from CSV file
+        songs = read_songs_from_csv(f"Output/{playlist_name}/{playlist_save_csv}")  
+        # Generate HTML content
+        html_list = generate_html_list(songs)
+        # Read HTML template
+        html_template = read_html_template('web_template/html_template_backup_report.html')
+        # Extract head and body from HTML template
+        head, body = extract_head_and_body(html_template)
+        # Define page title based on playlist_name variable
+        page_title = f"Videos for Playlist: {playlist_name}"
+        # Combine everything into a complete HTML structure with custom page title and CSS styles
+        final_html = f"<html><head><title>{page_title}</title>{head}<style>{css_styles}</style></head><body>{body}{html_list}<footer><h3>Authors:</h3><div class='links'><a href='https://github.com/seba0456'><strong>seba0456/Kordight</strong></a></div></footer></body></html>"
+        # Write final HTML to file
+        with open(f"Output/{playlist_name}/playlist_backup_latest.html", "w", encoding="utf-8") as outfile:
+            outfile.write(final_html)
+        with open(f"Output/{playlist_name}/{today}_playlist_backup_latest.html", "w", encoding="utf-8") as outfile:
+            outfile.write(final_html)
 print("Done.")
 input("Press Enter to continue...")

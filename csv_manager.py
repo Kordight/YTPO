@@ -28,7 +28,7 @@ class Song:
         self.similarity = similarity
 
 # Function to read data from CSV file and create a list of Song objects
-def read_songs_from_csv(filename):
+def read_duplicate_songs_from_csv(filename):
     songs = []
     with open(filename, 'r', encoding='utf-8') as csvfile:
         reader = csv.reader(csvfile)
@@ -40,3 +40,13 @@ def read_songs_from_csv(filename):
             songs.append((song1, song2))
     return songs
 
+def read_songs_from_csv(filename):
+    songs = []
+    with open(filename, 'r', encoding='utf-8') as csvfile:
+        reader = csv.reader(csvfile)
+        next(reader)  # Skip header row
+        for row in reader:
+            title, url = row
+            song = Song(title.strip(), url.strip())
+            songs.append((song))
+    return songs

@@ -1,9 +1,20 @@
+from datetime import datetime
+today = datetime.today().strftime("%H-%M_%Y-%m-%d")
+
 # Function to generate HTML code for the list of similar songs
-def generate_html_list(songs):
+def generate_html_duplicate_list(songs):
     song_amount=len(songs)
-    html_content = "<div class='border-box'><h1>Similar songs</h1><br><p>Found: " + str(song_amount) + " similar videos in this playlist.</p><br><ol>"
+    html_content = "<div class='border-box'><h1>Similar videos</h1><br><p>Found: <b>" + str(song_amount) + "</b> similar videos in this playlist.</p><br><ol>"
     for song1, song2 in songs:
         html_content += f"<li><a href='{song1.url}'>{song1.title}</a> is similar to: <a href='{song2.url}'>{song2.title}</a> by: {song2.similarity if song2.similarity else ''}</li><br>"
+    html_content += "</ol></div>"
+    return html_content
+
+def generate_html_list(songs):
+    song_amount=len(songs)
+    html_content = "<div class='border-box'><h1>Playlist backup</h1><br><p>Found: <b>" + str(song_amount) + "</b> videos in this playlist. <i>(Date: "+str(today)+")</i></p><br><ol>"
+    for song1 in songs:
+        html_content += f"<li><a href='{song1.url}'>{song1.title}</a></li><br>"
     html_content += "</ol></div>"
     return html_content
 
