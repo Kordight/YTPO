@@ -2,3 +2,6 @@
 Output/*
 # Ignore Logs directory
 Logs/*
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]

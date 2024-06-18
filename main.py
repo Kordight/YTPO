@@ -12,6 +12,7 @@ import logging
 import os
 import platform
 import subprocess
+import argparse
 from csv_manager import save_similar_titles_to_csv, save_playlist_to_csv, read_duplicate_songs_from_csv, read_songs_from_csv
 from html_manager import extract_head_and_body, read_html_template, generate_html_duplicate_list, generate_html_list
 
@@ -83,9 +84,13 @@ backup_playlist = int(config.get('main', 'backup_playlist'))
 download_wav = int(config.get('main', 'download_wav'))
 use_csv = int(config.get('main', 'use_csv_file'))
 
-# Get playlist link from user
-print("YTPO by Sebastian Legieziński (seba0456)")
-playlist_link = input("Enter YouTube playlist link: ")
+# Set up argument parser
+parser = argparse.ArgumentParser(description='YTPO by Sebastian Legieziński')
+parser.add_argument('--playlistURL', type=str, help='YouTube playlist link')
+args = parser.parse_args()
+
+# Get playlist link from user or argument
+playlist_link = args.playlistURL if args.playlistURL else input("Enter YouTube playlist link: ")
 playlist = Playlist(playlist_link)
 playlist_name = playlist.title
 playlist_save = f"{playlist_name}_{today}.txt"
@@ -142,7 +147,7 @@ if similar_titles:
         # Read data from CSV file
         songs = read_duplicate_songs_from_csv(f"Output/{playlist_name}/similar_titles.csv")  
         # Generate HTML content
-        html_list = generate_html_duplicate_list(songs)
+        html_list = generate_html_duplicate_list(songs,playlist_name,playlist_link)
         # Read HTML template
         html_template = read_html_template('web_template/html_template_similar_report.html')
         # Extract head and body from HTML template
@@ -228,7 +233,7 @@ if backup_playlist == 1:
         # Read data from CSV file
         songs = read_songs_from_csv(f"Output/{playlist_name}/{playlist_save_csv}")  
         # Generate HTML content
-        html_list = generate_html_list(songs)
+        html_list = generate_html_list(songs,playlist_name,playlist_link)
         # Read HTML template
         html_template = read_html_template('web_template/html_template_backup_report.html')
         # Extract head and body from HTML template
@@ -240,7 +245,7 @@ if backup_playlist == 1:
         # Write final HTML to file
         with open(f"Output/{playlist_name}/playlist_backup_latest.html", "w", encoding="utf-8") as outfile:
             outfile.write(final_html)
-        with open(f"Output/{playlist_name}/{today}_playlist_backup_latest.html", "w", encoding="utf-8") as outfile:
+        with open(f"Output/{playlist_name}/{today}_playlist_backup.html", "w", encoding="utf-8") as outfile:
             outfile.write(final_html)
 print("Done.")
 input("Press Enter to continue...")
