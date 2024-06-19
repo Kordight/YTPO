@@ -1,9 +1,8 @@
-# Import libraries
+# Import necessary libraries
 import re
 import difflib
-from pytube import YouTube, Playlist
-from moviepy.editor import *
-from moviepy.video.io.VideoFileClip import VideoFileClip
+import yt_dlp
+from moviepy.editor import VideoFileClip
 from tqdm import tqdm
 import configparser
 import time
@@ -13,11 +12,20 @@ import os
 import platform
 import subprocess
 import argparse
-from csv_manager import save_similar_titles_to_csv, save_playlist_to_csv, read_duplicate_songs_from_csv, read_songs_from_csv
-from html_manager import extract_head_and_body, read_html_template, generate_html_duplicate_list, generate_html_list
-import difflib
+from csv_manager import (
+    save_similar_titles_to_csv,
+    save_playlist_to_csv,
+    read_duplicate_songs_from_csv,
+    read_songs_from_csv,
+)
+from html_manager import (
+    extract_head_and_body,
+    read_html_template,
+    generate_html_duplicate_list,
+    generate_html_list,
+)
 
-# Define functions
+# Define utility functions
 def open_file(path):
     if platform.system() == "Windows":
         os.startfile(path)
@@ -42,24 +50,25 @@ def uniquify(path):
     return new_path
 
 def download_video(url, folder):
-    yt = YouTube(url)
-    video = yt.streams.filter(file_extension='mp4').first()
-    if not os.path.exists(folder):
-        os.makedirs(folder)
-    path_mp4 = uniquify(os.path.join(folder, video.default_filename))
-    video.download(output_path="", filename=path_mp4)
+    ydl_opts = {
+        'format': 'mp4',
+        'outtmpl': os.path.join(folder, '%(title)s.%(ext)s')
+    }
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        ydl.download([url])
 
 def download_audio(url, con_extension, folder):
-    yt = YouTube(url)
-    audio = yt.streams.filter(file_extension='mp4').first()
-    if not os.path.exists(folder):
-        os.makedirs(folder)
-    path_mp3 = uniquify(os.path.join(folder, audio.default_filename.replace("temp_", "").replace(".mp4", con_extension)))
-    audio.download(folder, filename=audio.default_filename)
-    video = VideoFileClip(os.path.join(folder, audio.default_filename))
-    video.audio.write_audiofile(path_mp3, verbose=False)
-    video.close()
-    os.remove(os.path.join(folder, audio.default_filename))
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'outtmpl': os.path.join(folder, '%(title)s.%(ext)s'),
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': con_extension.replace('.', ''),
+            'preferredquality': '192',
+        }]
+    }
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        ydl.download([url])
 
 def get_similar_titles(title1, title2):
     title1_clean = re.sub(r'[^\w\s]', '', title1.lower())
@@ -92,11 +101,20 @@ args = parser.parse_args()
 
 # Get playlist link from user or argument
 playlist_link = args.playlistURL if args.playlistURL else input("Enter YouTube playlist link: ")
-playlist = Playlist(playlist_link)
-playlist_name = playlist.title
-playlist_save = f"{playlist_name}_{today}.txt"
-playlist_save_csv = f"{playlist_name}_{today}.csv"
-video_links = playlist.video_urls
+
+# Fetch playlist details using yt-dlp
+ydl_opts = {
+    'quiet': True,
+    'extract_flat': True,
+    'dump_single_json': True,
+    'skip_download': True
+}
+with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+    playlist_dict = ydl.extract_info(playlist_link, download=False)
+
+playlist_name = playlist_dict['title']
+playlist_save_csv = str(today)+str(playlist_name) + ".csv"
+video_links = [entry['url'] for entry in playlist_dict['entries']]
 
 create_folder_if_none(f"Output/{playlist_name}")
 
@@ -108,7 +126,9 @@ start = time.time()
 
 for link in tqdm(video_links, desc="Processing playlist videos"):
     try:
-        video_title = YouTube(link).title
+        with yt_dlp.YoutubeDL({'quiet': True}) as ydl:
+            video_info = ydl.extract_info(link, download=False)
+            video_title = video_info['title']
         video_titles.append(video_title)
         saved_video_links.append(link)
     except Exception as e:
@@ -143,14 +163,14 @@ if similar_titles:
         print("Saving similar titles to .csv...")
         save_similar_titles_to_csv(f"Output/{playlist_name}/similar_titles.csv", similar_titles)
         # Load .css content
-        css_file_path = 'web_template/style_template.css'  
+        css_file_path = 'web_template/style_template.css'
         with open(css_file_path, 'r', encoding='utf-8') as css_file:
             css_styles = css_file.read()
         logging.info('Saving similar titles to .html (This may take a while)...')
         print("Saving similar titles to .html (This may take a while)...")
-        songs = read_duplicate_songs_from_csv(f"Output/{playlist_name}/similar_titles.csv")  
+        songs = read_duplicate_songs_from_csv(f"Output/{playlist_name}/similar_titles.csv")
         # Generate HTML content
-        html_list = generate_html_duplicate_list(songs,playlist_name,playlist_link)
+        html_list = generate_html_duplicate_list(songs, playlist_name, playlist_link)
         # Read HTML template
         html_template = read_html_template('web_template/html_template_similar_report.html')
         # Extract head and body from HTML template
@@ -189,7 +209,7 @@ if can_download_video == 1 or can_download_music == 1:
             except Exception as e:
                 wrong_links.append((link, str(e)))
                 logging.error(f"Can't download: {link} -- {e}")
-        
+
         print(f"Downloaded {downloaded_files} audio file(s).")
         if wrong_links:
             print(f"Couldn't download {len(wrong_links)} file(s).")
@@ -209,7 +229,7 @@ if can_download_video == 1 or can_download_music == 1:
             except Exception as e:
                 wrong_links.append((link, str(e)))
                 logging.error(f"Can't download: {link} -- {e}")
-        
+
         print(f"Downloaded {downloaded_files} video file(s).")
         if wrong_links:
             print(f"Couldn't download {len(wrong_links)} file(s).")
@@ -230,15 +250,15 @@ if backup_playlist == 1:
         save_playlist_to_csv(f"Output/{playlist_name}/{playlist_save_csv}", saved_video_links, video_titles)
 
         # Load .css content
-        css_file_path = 'web_template/style_template.css'  
+        css_file_path = 'web_template/style_template.css'
         with open(css_file_path, 'r', encoding='utf-8') as css_file:
             css_styles = css_file.read()
         logging.info('Saving playlist report to .html (This may take a while)...')
         print("Saving playlist report to .html (This may take a while)...")
         # Read data from CSV file
-        songs = read_songs_from_csv(f"Output/{playlist_name}/{playlist_save_csv}")  
+        songs = read_songs_from_csv(f"Output/{playlist_name}/{playlist_save_csv}")
         # Generate HTML content
-        html_list = generate_html_list(songs,playlist_name,playlist_link)
+        html_list = generate_html_list(songs, playlist_name, playlist_link)
         # Read HTML template
         html_template = read_html_template('web_template/html_template_backup_report.html')
         # Extract head and body from HTML template
@@ -253,4 +273,3 @@ if backup_playlist == 1:
         with open(f"Output/{playlist_name}/{today}_playlist_backup.html", "w", encoding="utf-8") as outfile:
             outfile.write(final_html)
 print("Done.")
-#input("Press Enter to continue...")
