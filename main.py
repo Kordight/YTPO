@@ -44,13 +44,15 @@ def uniquify(path):
     filename, extension = os.path.splitext(path)
     counter = 1
     new_path = path
-    while os.path.exists(new_path):
+    while (os.path.exists(new_path)):
         new_path = f"{filename} ({counter}){extension}"
         counter += 1
     return new_path
 
 def download_video(url, folder):
     ydl_opts = {
+	'noprogress': True,	
+	'quiet': True,
         'format': 'mp4',
         'outtmpl': os.path.join(folder, '%(title)s.%(ext)s')
     }
@@ -59,7 +61,9 @@ def download_video(url, folder):
 
 def download_audio(url, con_extension, folder):
     ydl_opts = {
-        'format': 'bestaudio/best',
+	'noprogress': True,	
+	'quiet': True,        
+	'format': 'bestaudio/best',
         'outtmpl': os.path.join(folder, '%(title)s.%(ext)s'),
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',
@@ -113,8 +117,8 @@ with yt_dlp.YoutubeDL(ydl_opts) as ydl:
     playlist_dict = ydl.extract_info(playlist_link, download=False)
 
 playlist_name = playlist_dict['title']
-playlist_save_csv = str(today)+str(playlist_name) + ".csv"
-video_links = [entry['url'] for entry in playlist_dict['entries']]
+playlist_save_csv = f"{today}_{playlist_name}.csv"
+video_entries = playlist_dict['entries']
 
 create_folder_if_none(f"Output/{playlist_name}")
 
@@ -124,16 +128,15 @@ saved_video_links = []
 invalid_video_links = []
 start = time.time()
 
-for link in tqdm(video_links, desc="Processing playlist videos"):
+for entry in tqdm(video_entries, desc="Processing playlist videos"):
     try:
-        with yt_dlp.YoutubeDL({'quiet': True}) as ydl:
-            video_info = ydl.extract_info(link, download=False)
-            video_title = video_info['title']
+        video_title = entry['title']
+        video_url = entry['url']
         video_titles.append(video_title)
-        saved_video_links.append(link)
+        saved_video_links.append(video_url)
     except Exception as e:
-        invalid_video_links.append((link, str(e)))
-        logging.error(f"Invalid link: {link} -- {e}")
+        invalid_video_links.append((entry['url'], str(e)))
+        logging.error(f"Invalid link: {entry['url']} -- {e}")
 
 print(f'Time taken: {time.time() - start:.2f} seconds')
 print("Comparing titles...")
@@ -242,7 +245,7 @@ if backup_playlist == 1:
     print("Creating playlist backup...")
     if use_csv == 0:
         logging.info('Creating playlist backup...')
-        with open(f"Output/{playlist_name}/{playlist_save}", "w", encoding='utf-8') as file:
+        with open(f"Output/{playlist_name}/{playlist_save_csv}", "w", encoding='utf-8') as file:
             file.write("Videos in playlist:\n")
             for title, link in zip(video_titles, saved_video_links):
                 file.write(f"{title}     {link}\n")
