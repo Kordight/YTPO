@@ -2,8 +2,6 @@
 
 YTPO is a program written with the help of the [yt-dlp](https://github.com/yt-dlp/yt-dlp) library. This script can list similar video titles, and invalid video links, and save a report in `.txt`, `.csv`, and user-friendly `.html` formats detailing what videos are in a playlist. YouTube Playlist Organizer can also download videos from a playlist and save them as mp3 or mp4 files.
 
-![image](https://user-images.githubusercontent.com/46867564/216819827-3c7ed7b9-a2fd-4398-ad84-3d29a6bfb1d7.png)
-
 ## Setup
 
 Download the `.zip` from GitHub or type:
