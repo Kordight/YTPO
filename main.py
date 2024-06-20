@@ -24,6 +24,7 @@ from html_manager import (
     read_html_template,
     generate_html_duplicate_list,
     generate_html_list,
+    load_js_code_from_file,
 )
 
 # Define utility functions
@@ -33,7 +34,12 @@ def open_file(path):
     elif platform.system() == "Darwin":
         subprocess.Popen(["open", path])
     else:
-        subprocess.Popen(["xdg-open", path])
+        try:
+            subprocess.Popen(["xdg-open", path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        except FileNotFoundError:
+            logging.error(f"xdg-open not found. Please install it to open files: {path}")
+            return
+    
     print(f"Opening {path}")
     logging.debug(f'Opening {path}')
 
@@ -200,8 +206,10 @@ if similar_titles:
         head, body = extract_head_and_body(html_template)
         # Define page title based on playlist_name variable
         page_title = f"Similar Videos for Playlist: {playlist_name}"
+        # Load JS code
+        js_code=load_js_code_from_file('web_template/script_head_template.js')
         # Combine everything into a complete HTML structure with custom page title and CSS styles
-        final_html = f"<html><head><title>{page_title}</title>{head}<style>{css_styles}</style></head><body>{body}{html_list}<footer><h3>Authors:</h3><div class='links'><a href='https://github.com/seba0456'><strong>seba0456/Kordight</strong></a></div></footer></body></html>"
+        final_html = f"<html><head><title>{page_title}</title><script>{js_code}</script>{head}<style>{css_styles}</style></head><body>{body}{html_list}<footer><h3>Authors:</h3><div class='links'><a href='https://github.com/seba0456'><strong>seba0456/Kordight</strong></a></div></footer></body></html>"
         # Write final HTML to file
         with open(f"Output/{playlist_name}/similar_videos.html", "w", encoding="utf-8") as outfile:
             outfile.write(final_html)
@@ -223,9 +231,12 @@ if can_download_video == 1 or can_download_music == 1:
         csv_file_path_audio = os.path.join('Output', playlist_name, 'Music', 'downloaded.csv')
         if resume_downloads == 1:
             video_links_to_download=subtract_links(saved_video_links, csv_file_path_audio)
-            if len(saved_video_links) != len(video_links_to_download):
+            if len(saved_video_links) != len(video_links_to_download) and len(video_links_to_download) != 0:
                 print(f"Resuming download.")
-                logging.debug(f'Resuming download.')
+                logging.debug(f"Resuming download.")
+            elif len(video_links_to_download) == 0:
+                print(f"No (new) files to download.")
+                logging.debug(f"No (new) files to download.")
 
         else:
              video_links_to_download=saved_video_links
@@ -256,16 +267,19 @@ if can_download_video == 1 or can_download_music == 1:
         print(f'CSV path for video is: {csv_file_path_video}')
         if resume_downloads == 1:
             video_links_to_download=subtract_links(saved_video_links, csv_file_path_video)
-            if len(saved_video_links) != len(video_links_to_download):
+            if len(saved_video_links) != len(video_links_to_download) and len(video_links_to_download) != 0:
                 print(f"Resuming download.")
                 logging.debug(f"Resuming download.")
+            elif len(video_links_to_download) == 0:
+                print(f"No (new) files to download.")
+                logging.debug(f"No (new) files to download.")
         else:
              video_links_to_download=saved_video_links
         print(f"Downloading {len(video_links_to_download)} video file(s).")
         logging.debug(f"Downloading {len(video_links_to_download)} video file(s).")
         downloaded_files = 0
         wrong_links = []
-        for link in tqdm(saved_video_links, desc="Downloading video files"):
+        for link in tqdm(video_links_to_download, desc="Downloading video files"):
             try:
                 download_video(link, f"Output/{playlist_name}/Videos", csv_file_path_video)
                 downloaded_files += 1
@@ -310,8 +324,10 @@ if backup_playlist == 1:
         head, body = extract_head_and_body(html_template)
         # Define page title based on playlist_name variable
         page_title = f"Videos for Playlist: {playlist_name}"
+        # Load JS template
+        js_code=load_js_code_from_file('web_template/script_head_template.js')
         # Combine everything into a complete HTML structure with custom page title and CSS styles
-        final_html = f"<html><head><title>{page_title}</title>{head}<style>{css_styles}</style></head><body>{body}{html_list}<footer><h3>Authors:</h3><div class='links'><a href='https://github.com/seba0456'><strong>seba0456/Kordight</strong></a></div></footer></body></html>"
+        final_html = f"<html><head><title>{page_title}</title><script>{js_code}</script>{head}<style>{css_styles}</style></head><body>{body}{html_list}<footer><h3>Authors:</h3><div class='links'><a href='https://github.com/seba0456'><strong>seba0456/Kordight</strong></a></div></footer></body></html>"
         # Write final HTML to file
         with open(f"Output/{playlist_name}/playlist_backup_latest.html", "w", encoding="utf-8") as outfile:
             outfile.write(final_html)
