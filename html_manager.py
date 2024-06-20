@@ -47,3 +47,7 @@ def extract_head_and_body(html_content):
     body = html_content[body_start:body_end].strip()
     
     return head, body
+def load_js_code_from_file(file_path):
+    with open(file_path, 'r', encoding='utf-8') as file:
+        js_content = file.read()
+    return js_content

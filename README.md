@@ -1,8 +1,6 @@
 # What is YouTube Playlist Organizer?
 
-YTPO is a program written with the help of the [Pytube](https://github.com/pytube/pytube) library. This script can list similar video titles, and invalid video links, and save a report in `.txt`, `.csv`, and user-friendly `.html` formats detailing what videos are in a playlist. YouTube Playlist Organizer can also download videos from a playlist and save them as mp3 or mp4 files.
-
-![image](https://user-images.githubusercontent.com/46867564/216819827-3c7ed7b9-a2fd-4398-ad84-3d29a6bfb1d7.png)
+YTPO is a program written with the help of the [yt-dlp](https://github.com/yt-dlp/yt-dlp) library. This script can list similar video titles, and invalid video links, and save a report in `.txt`, `.csv`, and user-friendly `.html` formats detailing what videos are in a playlist. YouTube Playlist Organizer can also download videos from a playlist and save them as mp3 or mp4 files.
 
 ## Setup
 
@@ -13,12 +11,14 @@ Download the `.zip` from GitHub or type:
 git clone https://github.com/seba0456/YouTube-Playlist-Organizer
 ```
 
-Then enter the project directory. In order to make it work, you need [tqdm](https://github.com/tqdm/tqdm), [Pytube](https://github.com/pytube/pytube), and [Moviepy](https://github.com/Zulko/moviepy). You can install them by typing in terminal/cmd:
+Then enter the project directory. In order to make it work, you need [tqdm](https://github.com/tqdm/tqdm), [yt-dlp](https://github.com/yt-dlp/yt-dlp) . You can install them by typing in terminal/cmd:
 
 ```sh
 
 pip install -r requirements.txt
 ```
+
+This script requires [FFmpeg](https://ffmpeg.org/)
 
 Then you need to edit `config.ini`.
 
@@ -33,6 +33,8 @@ Then you need to edit `config.ini`.
 - `download_wav=` enables or disables saving audio from the playlist as `.wav` files, default `0`, valid values: `0` or `1`.
 
 - `use_csv_file=` enables or disables saving reports from the playlist as `.csv` and `.html` files, default `1`, valid values: `0` or `1`.
+
+- `resume_playlist_download=` enables or disables resuming download on lates finished video from playlist, default `1`, valid values: `0` or `1`.
 
 ## Running the Program
 
@@ -76,3 +78,4 @@ Keep in mind that `.txt` reports are deprecated. By default, `.html` and `.csv` 
 3. You can run this script automatically and ensure that you will never lose video titles due to the original video deletion.
 4. You can use the script to generate reports for playlist management, making it easier to organize and review content.
 5. You can back up entire playlists, preserving links and titles in case of future changes or deletions on YouTube.
+6. You can run this script automatically and archive new videos added to the playlist.
