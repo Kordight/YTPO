@@ -2,7 +2,6 @@
 import re
 import difflib
 import yt_dlp
-from moviepy.editor import VideoFileClip
 from tqdm import tqdm
 import configparser
 import time
@@ -17,6 +16,8 @@ from csv_manager import (
     save_playlist_to_csv,
     read_duplicate_songs_from_csv,
     read_songs_from_csv,
+    update_downloaded_list_csv_report,
+    subtract_links,
 )
 from html_manager import (
     extract_head_and_body,
@@ -49,21 +50,31 @@ def uniquify(path):
         counter += 1
     return new_path
 
-def download_video(url, folder):
+def download_video(url, folder, csv_file_path):
+    create_folder_if_none(folder)
+    
     ydl_opts = {
-	'noprogress': True,	
-	'quiet': True,
+        'noprogress': True,
+        'quiet': True,
         'format': 'mp4',
         'outtmpl': os.path.join(folder, '%(title)s.%(ext)s')
     }
+    
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        ydl.download([url])
+        info_dict = ydl.extract_info(url, download=True)
+        title = info_dict.get('title', None)
+        ext = 'mp4'
+        downloaded_file = f"{title}.{ext}" if title else 'unknown_file'
+    
+    update_downloaded_list_csv_report(csv_file_path, url, downloaded_file)
 
-def download_audio(url, con_extension, folder):
+def download_audio(url, con_extension, folder, csv_file_path):
+    print(folder)
+    create_folder_if_none(folder)
     ydl_opts = {
-	'noprogress': True,	
-	'quiet': True,        
-	'format': 'bestaudio/best',
+        'noprogress': True,    
+        'quiet': True,        
+        'format': 'bestaudio/best',
         'outtmpl': os.path.join(folder, '%(title)s.%(ext)s'),
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',
@@ -71,8 +82,16 @@ def download_audio(url, con_extension, folder):
             'preferredquality': '192',
         }]
     }
+    
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        ydl.download([url])
+
+        info_dict = ydl.extract_info(url, download=True)
+        title = info_dict.get('title', None)
+        ext = con_extension.replace('.', '')
+        downloaded_file = f"{title}.{ext}" if title else 'unknown_file'
+
+    update_downloaded_list_csv_report(csv_file_path, url, downloaded_file)
+
 
 def get_similar_titles(title1, title2):
     title1_clean = re.sub(r'[^\w\s]', '', title1.lower())
@@ -97,6 +116,7 @@ can_download_music = int(config.get('main', 'download_music'))
 backup_playlist = int(config.get('main', 'backup_playlist'))
 download_wav = int(config.get('main', 'download_wav'))
 use_csv = int(config.get('main', 'use_csv_file'))
+resume_downloads= int(config.get('main', 'resume_playlist_download'))
 
 # Set up argument parser
 parser = argparse.ArgumentParser(description='YTPO by Sebastian Legieziński')
@@ -200,13 +220,23 @@ if invalid_video_links:
 # Download videos and audio
 if can_download_video == 1 or can_download_music == 1:
     if can_download_music == 1:
-        print(f"Downloading {len(saved_video_links)} audio file(s).")
+        csv_file_path_audio = os.path.join('Output', playlist_name, 'Music', 'downloaded.csv')
+        if resume_downloads == 1:
+            video_links_to_download=subtract_links(saved_video_links, csv_file_path_audio)
+            if len(saved_video_links) != len(video_links_to_download):
+                print(f"Resuming download.")
+                logging.debug(f'Resuming download.')
+
+        else:
+             video_links_to_download=saved_video_links
+        print(f"Downloading {len(video_links_to_download)} audio file(s).")
+        logging.debug(f"Downloading {len(video_links_to_download)} audio file(s).")
         downloaded_files = 0
         wrong_links = []
-        for link in tqdm(saved_video_links, desc="Downloading audio files"):
+        for link in tqdm(video_links_to_download, desc="Downloading audio files"):
             try:
                 con_extension = ".wav" if download_wav == 1 else ".mp3"
-                download_audio(link, con_extension, f"Output/{playlist_name}/Music")
+                download_audio(link, con_extension, f"Output/{playlist_name}/Music", csv_file_path_audio)
                 downloaded_files += 1
                 logging.info(f"Downloaded audio: {link}")
             except Exception as e:
@@ -214,6 +244,7 @@ if can_download_video == 1 or can_download_music == 1:
                 logging.error(f"Can't download: {link} -- {e}")
 
         print(f"Downloaded {downloaded_files} audio file(s).")
+        logging.debug(f"Downloaded {downloaded_files} audio file(s).")
         if wrong_links:
             print(f"Couldn't download {len(wrong_links)} file(s).")
             for link, reason in wrong_links:
@@ -221,12 +252,22 @@ if can_download_video == 1 or can_download_music == 1:
         open_file(f"Output/{playlist_name}/Music")
 
     if can_download_video == 1:
-        print(f"Downloading {len(saved_video_links)} video file(s).")
+        csv_file_path_video = os.path.join('Output', playlist_name, 'Videos', 'downloaded.csv')
+        print(f'CSV path for video is: {csv_file_path_video}')
+        if resume_downloads == 1:
+            video_links_to_download=subtract_links(saved_video_links, csv_file_path_video)
+            if len(saved_video_links) != len(video_links_to_download):
+                print(f"Resuming download.")
+                logging.debug(f"Resuming download.")
+        else:
+             video_links_to_download=saved_video_links
+        print(f"Downloading {len(video_links_to_download)} video file(s).")
+        logging.debug(f"Downloading {len(video_links_to_download)} video file(s).")
         downloaded_files = 0
         wrong_links = []
         for link in tqdm(saved_video_links, desc="Downloading video files"):
             try:
-                download_video(link, f"Output/{playlist_name}/Videos")
+                download_video(link, f"Output/{playlist_name}/Videos", csv_file_path_video)
                 downloaded_files += 1
                 logging.info(f"Downloaded video: {link}")
             except Exception as e:
@@ -234,6 +275,7 @@ if can_download_video == 1 or can_download_music == 1:
                 logging.error(f"Can't download: {link} -- {e}")
 
         print(f"Downloaded {downloaded_files} video file(s).")
+        logging.debug(f"Downloaded {downloaded_files} video file(s).")
         if wrong_links:
             print(f"Couldn't download {len(wrong_links)} file(s).")
             for link, reason in wrong_links:
