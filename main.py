@@ -209,7 +209,7 @@ if similar_titles:
         # Load JS code
         js_code=load_js_code_from_file('web_template/script_head_template.js')
         # Combine everything into a complete HTML structure with custom page title and CSS styles
-        final_html = f"<html><head><title>{page_title}</title><script>{js_code}</script>{head}<style>{css_styles}</style></head><body>{body}{html_list}<footer><h3>Authors:</h3><div class='links'><a href='https://github.com/seba0456'><strong>seba0456/Kordight</strong></a></div></footer></body></html>"
+        final_html = f"<html><head><title>{page_title}</title><script>{js_code}</script>{head}<style>{css_styles}</style></head><body>{body}{html_list}<footer><h3>Authors:</h3><div class='links'><a href='https://github.com/Kordight'><strong>Kordight</strong></a></div></footer></body></html>"
         # Write final HTML to file
         with open(f"Output/{playlist_name}/similar_videos.html", "w", encoding="utf-8") as outfile:
             outfile.write(final_html)
@@ -327,7 +327,7 @@ if backup_playlist == 1:
         # Load JS template
         js_code=load_js_code_from_file('web_template/script_head_template.js')
         # Combine everything into a complete HTML structure with custom page title and CSS styles
-        final_html = f"<html><head><title>{page_title}</title><script>{js_code}</script>{head}<style>{css_styles}</style></head><body>{body}{html_list}<footer><h3>Authors:</h3><div class='links'><a href='https://github.com/seba0456'><strong>seba0456/Kordight</strong></a></div></footer></body></html>"
+        final_html = f"<html><head><title>{page_title}</title><script>{js_code}</script>{head}<style>{css_styles}</style></head><body>{body}{html_list}<footer><h3>Authors:</h3><div class='links'><a href='https://github.com/Kordight'><strong>Kordight</strong></a></div></footer></body></html>"
         # Write final HTML to file
         with open(f"Output/{playlist_name}/playlist_backup_latest.html", "w", encoding="utf-8") as outfile:
             outfile.write(final_html)
