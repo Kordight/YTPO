@@ -132,7 +132,7 @@ host=str(config.get('database', 'host'))
 user=str(config.get('database', 'user'))
 password=str(config.get('database', 'password'))
 database=str(config.get('database', 'database'))
-use_database=can_download_video = int(config.get('main', 'use_database'))
+use_database = int(config.get('main', 'use_database'))
 
 # Set up argument parser
 parser = argparse.ArgumentParser(description='YTPO by Sebastian Legieziński')
@@ -237,7 +237,6 @@ if invalid_video_links:
 
 # Download videos and audio
 if can_download_video == 1 or can_download_music == 1:
-    print(f"Downloading ({can_download_video},{can_download_video})")
     if can_download_music == 1:
         csv_file_path_audio = os.path.join('Output', playlist_name, 'Music', 'downloaded.csv')
         if resume_downloads == 1:
