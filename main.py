@@ -237,6 +237,7 @@ if invalid_video_links:
 
 # Download videos and audio
 if can_download_video == 1 or can_download_music == 1:
+    print(f"Downloading ({can_download_video},{can_download_video})")
     if can_download_music == 1:
         csv_file_path_audio = os.path.join('Output', playlist_name, 'Music', 'downloaded.csv')
         if resume_downloads == 1:
