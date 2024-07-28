@@ -26,6 +26,7 @@ from html_manager import (
     generate_html_list,
     load_js_code_from_file,
 )
+from mySQL_manager import create_database, add_report
 
 # Define utility functions
 def open_file(path):
@@ -124,6 +125,13 @@ download_wav = int(config.get('main', 'download_wav'))
 use_csv = int(config.get('main', 'use_csv_file'))
 resume_downloads= int(config.get('main', 'resume_playlist_download'))
 
+# MySQL zone
+host=str(config.get('database', 'host'))
+user=str(config.get('database', 'user'))
+password=str(config.get('database', 'password'))
+database=str(config.get('database', 'database'))
+use_database=can_download_video = int(config.get('main', 'use_database'))
+
 # Set up argument parser
 parser = argparse.ArgumentParser(description='YTPO by Sebastian Legieziński')
 parser.add_argument('--playlistURL', type=str, help='YouTube playlist link')
@@ -145,7 +153,7 @@ with yt_dlp.YoutubeDL(ydl_opts) as ydl:
 playlist_name = playlist_dict['title']
 playlist_save_csv = f"{today}_{playlist_name}.csv"
 video_entries = playlist_dict['entries']
-
+database_file = f"Output/{playlist_name}"
 create_folder_if_none(f"Output/{playlist_name}")
 
 # Process playlist videos
@@ -333,4 +341,7 @@ if backup_playlist == 1:
             outfile.write(final_html)
         with open(f"Output/{playlist_name}/{today}_playlist_backup.html", "w", encoding="utf-8") as outfile:
             outfile.write(final_html)
+        if use_database == 1:
+            create_database(host,user,password, database)
+            add_report(host,user,password, database,video_titles,saved_video_links, playlist_name)
 print("Done.")
