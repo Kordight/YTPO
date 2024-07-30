@@ -1,5 +1,8 @@
+# Example SQL queries
 
-Compare 2 reports to see what changed in the playlist.
+Since this program supports saving reports to MySQL, I'll post here some useful queries that you can use.
+
+### Compare 2 reports to see what changed in the playlist.
 
 ```sql
 
