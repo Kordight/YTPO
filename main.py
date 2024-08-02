@@ -149,6 +149,7 @@ ydl_opts = {
     'dump_single_json': True,
     'skip_download': True
 }
+print(f"Processing your playlist...")
 with yt_dlp.YoutubeDL(ydl_opts) as ydl:
     playlist_dict = ydl.extract_info(playlist_link, download=False)
 
@@ -162,9 +163,8 @@ create_folder_if_none(f"Output/{playlist_name}")
 video_titles = []
 saved_video_links = []
 invalid_video_links = []
-start = time.time()
-
-for entry in tqdm(video_entries, desc="Processing playlist videos"):
+print(f"Processed {len(video_entries)} video(s) in {playlist_name}")
+for entry in video_entries:
     try:
         video_title = entry['title']
         video_url = entry['url']
@@ -174,7 +174,6 @@ for entry in tqdm(video_entries, desc="Processing playlist videos"):
         invalid_video_links.append((entry['url'], str(e)))
         logging.error(f"Invalid link: {entry['url']} -- {e}")
 
-print(f'Time taken: {time.time() - start:.2f} seconds')
 print("Comparing titles...")
 
 # Compare video titles for similarity
@@ -345,5 +344,5 @@ if backup_playlist == 1:
             outfile.write(final_html)
         if use_database == 1:
             create_database(host,user,password, database)
-            add_report(host,user,password, database,video_titles,saved_video_links, playlist_name)
+            add_report(host,user,password, database,video_titles,saved_video_links, playlist_name, playlist_link)
 print("Done.")

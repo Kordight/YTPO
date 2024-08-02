@@ -1,2 +1,5 @@
 tqdm==4.64.1
-yt_dlp==2024.5.27
+yt_dlp==2024.8.1
+mysql==0.0.3
+mysqlclient==2.2.4
+mysql-connector-python==9.0.0
