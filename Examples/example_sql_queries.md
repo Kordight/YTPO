@@ -68,83 +68,60 @@ Remember to replace `YOUR_PLAYLIST_URL` with playlist URL.
 
 ```sql
 
-WITH LatestReports AS (
-    SELECT 
-        r.report_id
-    FROM 
-        ytp_reports r
-    JOIN 
-        ytp_playlists p ON r.playlist_id = p.playlist_id
-    WHERE 
-        p.playlist_url = 'YOUR_PLAYLIST_URL'
-    ORDER BY 
-        r.report_date DESC
-    LIMIT 2
+WITH playlist_info AS (
+    SELECT playlist_id
+    FROM ytp_playlists
+    WHERE playlist_url = 'YOUR_PLAYLIST_URL'
 ),
-SecondLatestReport AS (
-    SELECT 
-        report_id 
-    FROM 
-        LatestReports 
-    LIMIT 1 OFFSET 1
-),
-LatestReport AS (
-    SELECT 
-        report_id 
-    FROM 
-        LatestReports 
+
+latest_report AS (
+    SELECT report_id
+    FROM ytp_reports
+    WHERE playlist_id = (SELECT playlist_id FROM playlist_info)
+    ORDER BY report_date DESC
     LIMIT 1
+),
+
+first_report AS (
+    SELECT report_id
+    FROM ytp_reports
+    WHERE playlist_id = (SELECT playlist_id FROM playlist_info)
+    ORDER BY report_id ASC
+    LIMIT 1
+),
+
+latest_report_videos AS (
+    SELECT rvd.video_id
+    FROM ytp_report_details rvd
+    JOIN latest_report lr ON rvd.report_id = lr.report_id
+),
+
+first_report_videos AS (
+    SELECT rvd.video_id
+    FROM ytp_report_details rvd
+    JOIN first_report fr ON rvd.report_id = fr.report_id
+),
+
+added_videos AS (
+    SELECT lv.video_id
+    FROM latest_report_videos lv
+    WHERE lv.video_id NOT IN (SELECT fv.video_id FROM first_report_videos fv)
+),
+
+removed_videos AS (
+    SELECT fv.video_id
+    FROM first_report_videos fv
+    WHERE fv.video_id NOT IN (SELECT lv.video_id FROM latest_report_videos lv)
 )
 
-SELECT 
-    v1.video_title AS title, 
-    v1.video_url AS link, 
-    p1.playlist_name AS playlist_name, 
-    'removed' AS status
-FROM 
-    ytp_reports r1
-JOIN 
-    ytp_report_details rd1 ON r1.report_id = rd1.report_id
-JOIN 
-    ytp_videos v1 ON rd1.video_id = v1.video_id
-JOIN 
-    ytp_playlists p1 ON r1.playlist_id = p1.playlist_id
-WHERE 
-    r1.report_id = (SELECT report_id FROM SecondLatestReport) 
-    AND v1.video_title NOT IN (
-        SELECT v2.video_title 
-        FROM ytp_reports r2
-        JOIN ytp_report_details rd2 ON r2.report_id = rd2.report_id
-        JOIN ytp_videos v2 ON rd2.video_id = v2.video_id
-        WHERE r2.report_id = (SELECT report_id FROM LatestReport)
-    )
+SELECT 'Added' AS action, v.video_title, v.video_url
+FROM added_videos av
+JOIN ytp_videos v ON av.video_id = v.video_id
 
 UNION ALL
 
-SELECT 
-    v2.video_title AS title, 
-    v2.video_url AS link, 
-    p2.playlist_name AS playlist_name, 
-    'added' AS status
-FROM 
-    ytp_reports r2
-JOIN 
-    ytp_report_details rd2 ON r2.report_id = rd2.report_id
-JOIN 
-    ytp_videos v2 ON rd2.video_id = v2.video_id
-JOIN 
-    ytp_playlists p2 ON r2.playlist_id = p2.playlist_id
-WHERE 
-    r2.report_id = (SELECT report_id FROM LatestReport)
-    AND v2.video_title NOT IN (
-        SELECT v1.video_title 
-        FROM ytp_reports r1
-        JOIN ytp_report_details rd1 ON r1.report_id = rd1.report_id
-        JOIN ytp_videos v1 ON rd1.video_id = v1.video_id
-        WHERE r1.report_id = (SELECT report_id FROM SecondLatestReport)
-    )
-
-ORDER BY title;
-
+SELECT 'Removed' AS action, v.video_title, v.video_url
+FROM removed_videos rv
+JOIN ytp_videos v ON rv.video_id = v.video_id;
 
 ```
