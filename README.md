@@ -1,6 +1,7 @@
 # What is YouTube Playlist Organizer?
 
 YTPO is a program written with the help of the [yt-dlp](https://github.com/yt-dlp/yt-dlp) library. This script can list similar video titles, and invalid video links, and save a report in `.txt`, `.csv`, and user-friendly `.html` formats detailing what videos are in a playlist. YouTube Playlist Organizer can also download videos from a playlist and save them as mp3 or mp4 files.
+YTPO also can save your playlist report to MySQL database.
 
 ## Setup
 
@@ -35,6 +36,8 @@ Then you need to edit `config.ini`.
 - `use_csv_file=` enables or disables saving reports from the playlist as `.csv` and `.html` files, default `1`, valid values: `0` or `1`.
 
 - `resume_playlist_download=` enables or disables resuming download on lates finished video from playlist, default `1`, valid values: `0` or `1`.
+
+- `use_database=` enables or disables saving report to the MySQL database, default `1`, valid values: `0` or `1`.
 
 ## Running the Program
 
