@@ -37,7 +37,7 @@ Then you need to edit `config.ini`.
 
 - `resume_playlist_download=` enables or disables resuming download on lates finished video from playlist, default `1`, valid values: `0` or `1`.
 
-- `use_database=` enables or disables saving report to the MySQL database, default `1`, valid values: `0` or `1`.
+- `use_database=` enables or disables saving report to the MySQL database, default `0`, valid values: `0` or `1`.
 
 ## Running the Program
 
