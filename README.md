@@ -9,7 +9,7 @@ Download the `.zip` from GitHub or type:
 
 ```sh
 
-git clone https://github.com/seba0456/YouTube-Playlist-Organizer
+git clone https://github.com/Kordight/YTPO
 ```
 
 Then enter the project directory. In order to make it work, you need [tqdm](https://github.com/tqdm/tqdm), [yt-dlp](https://github.com/yt-dlp/yt-dlp) . You can install them by typing in terminal/cmd:

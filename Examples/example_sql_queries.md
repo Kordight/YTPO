@@ -7,6 +7,8 @@ I'll do my best to improve these queries. Feel free to use them for your purpose
 
 Remember to replace `YOUR_PLAYLIST_URL` with playlist URL.
 
+```sql
+
 WITH playlist_info AS (
     SELECT playlist_id
     FROM ytp_playlists
