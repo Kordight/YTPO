@@ -106,6 +106,16 @@ def get_similar_titles(title1, title2):
     ratio = difflib.SequenceMatcher(None, title1_clean, title2_clean).ratio()
     return round(ratio, 2)
 
+def fix_playlist_URL(playlist_URL):
+    pattern = r'(?:list=)([a-zA-Z0-9_-]+)'
+
+    match = re.search(pattern, playlist_URL)
+    
+    if match:
+        playlist_id = match.group(1)
+        return f'https://www.youtube.com/playlist?list={playlist_id}'
+    return None
+
 # Set up logging and configuration
 create_folder_if_none("Logs")
 create_folder_if_none("Output")
@@ -140,7 +150,7 @@ parser.add_argument('--playlistURL', type=str, help='YouTube playlist link')
 args = parser.parse_args()
 
 # Get playlist link from user or argument
-playlist_link = args.playlistURL if args.playlistURL else input("Enter YouTube playlist link: ")
+playlist_link = fix_playlist_URL(args.playlistURL if args.playlistURL else input("Enter YouTube playlist link: "))
 
 # Fetch playlist details using yt-dlp
 ydl_opts = {
