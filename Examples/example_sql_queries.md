@@ -3,6 +3,36 @@
 Since this program supports saving reports to MySQL, I'll post here some useful queries that you can use.
 I'll do my best to improve these queries. Feel free to use them for your purposes.
 
+## List all videos for lates playlist report
+
+Remember to replace `YOUR_PLAYLIST_URL` with playlist URL.
+
+```sql
+WITH LatestReport AS (
+    SELECT 
+        r.report_id
+    FROM 
+        ytp_reports r
+    JOIN 
+        ytp_playlists p ON r.playlist_id = p.playlist_id
+    WHERE 
+        p.playlist_url = 'YOUR_PLAYLIST_URL'
+    ORDER BY 
+        r.report_date DESC
+    LIMIT 1
+)
+SELECT 
+    ROW_NUMBER() OVER (ORDER BY v.video_title) AS video_number,
+    v.video_title, v.video_url
+FROM 
+    ytp_videos v
+JOIN 
+    ytp_report_details rd ON v.video_id = rd.video_id
+JOIN 
+    LatestReport lr ON rd.report_id = lr.report_id;
+
+```
+
 ## Compare 2 reports to see what changed in the playlist
 
 Remember to replace `YOUR_PLAYLIST_URL` with playlist URL.
