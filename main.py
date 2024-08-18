@@ -120,7 +120,7 @@ def fix_playlist_URL(playlist_URL):
 create_folder_if_none("Logs")
 create_folder_if_none("Output")
 
-today = datetime.today().strftime("%H-%M_%Y-%m-%d")
+today = datetime.today().strftime("%Y-%m-%d_%H:%M")
 logging.basicConfig(filename=f'Logs/{today}_YTPO.log', encoding='utf-8', level=logging.DEBUG)
 print(f"The log file is known as: {today}_YTPO.log")
 
