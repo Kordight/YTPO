@@ -4,7 +4,7 @@ today = datetime.today().strftime("%Y-%m-%d (%H:%M)")
 # Function to generate HTML code for the list of similar songs
 def generate_html_duplicate_list(songs, playlist_name, playlist_url):
     song_amount=len(songs)
-    html_content = "<div class='border-box'><h1>Similar videos</h1><br><h2><a href='"+str(playlist_url)+"'>"+str(playlist_name)+"</a></h2><br><p>Found: <b>" + str(song_amount) + "</b> similar videos in this playlist.<br><i>Date: "+str(today)+"</i></p><br><ol>"
+    html_content = "<div class='border-box'><h1>Similar videos</h1><br><h2><a href='"+str(playlist_url)+"'>"+str(playlist_name)+"</a></h2><br><p>Found: <b>" + str(song_amount) + "</b> similar videos in this playlist.<br><i title='Y-M-D'>Date: "+str(today)+"</i></p><br><ol>"
     for song1, song2 in songs:
         html_content += f"<li><a href='{song1.url}' target='_blank'>{song1.title}</a> is similar to: <a href='{song2.url}' target='_blank'>{song2.title}</a> by: {song2.similarity if song2.similarity else ''}</li><br>"
     html_content += "</ol></div>"
@@ -20,7 +20,7 @@ def generate_html_list(songs, playlist_name, playlist_url):
         "<h1>Playlist backup</h1><br>"
         "<h2><a href='"+str(playlist_url)+"'>"+str(playlist_name)+"</a></h2><br>"
         "<p>Found: <b>" + str(song_amount) + "</b> videos in this playlist.<br>"
-        "<i>Date: "+str(today)+"</i></p><br>"
+        "<i title='Y-M-D'>Date: "+str(today)+"</i></p><br>"
         "<ol>"
     )
     
