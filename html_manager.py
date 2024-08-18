@@ -1,5 +1,5 @@
 from datetime import datetime
-today = datetime.today().strftime("%Y-%m-%d_%H:%M")
+today = datetime.today().strftime("%Y-%m-%d (%H:%M)")
 
 # Function to generate HTML code for the list of similar songs
 def generate_html_duplicate_list(songs, playlist_name, playlist_url):
