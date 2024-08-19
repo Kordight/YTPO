@@ -25,6 +25,7 @@ from html_manager import (
     generate_html_duplicate_list,
     generate_html_list,
     load_js_code_from_file,
+    generate_html_list_invalid_videos,
 )
 from mySQL_manager import create_database, add_report
 
@@ -121,8 +122,10 @@ create_folder_if_none("Logs")
 create_folder_if_none("Output")
 
 today = datetime.today().strftime("%Y-%m-%d_%H:%M")
-logging.basicConfig(filename=f'Logs/{today}_YTPO.log', encoding='utf-8', level=logging.DEBUG)
-print(f"The log file is known as: {today}_YTPO.log")
+today_n = datetime.today().strftime("%Y-%m-%d_%H_%M")
+
+logging.basicConfig(filename=f'Logs/{today_n}_YTPO.log', encoding='utf-8', level=logging.DEBUG)
+print(f"The log file is known as: {today_n}_YTPO.log")
 
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -164,7 +167,7 @@ with yt_dlp.YoutubeDL(ydl_opts) as ydl:
     playlist_dict = ydl.extract_info(playlist_link, download=False)
 
 playlist_name = playlist_dict['title']
-playlist_save_csv = f"{today}_{playlist_name}.csv"
+playlist_save_csv = f"{today_n}_{playlist_name}.csv"
 video_entries = playlist_dict['entries']
 database_file = f"Output/{playlist_name}"
 create_folder_if_none(f"Output/{playlist_name}")
@@ -243,6 +246,12 @@ if invalid_video_links:
         file.write("Links that are invalid:\n")
         for link, reason in invalid_video_links:
             file.write(f"{link} : {reason}\n")
+deleted_videos=[]
+deleted_videos_status=[]
+for title, link in zip(video_titles, saved_video_links):
+    if title == "[Deleted video]" or title == "[Private video]":
+        deleted_videos.append(link)
+        deleted_videos_status.append(title)
 
 # Download videos and audio
 if can_download_video == 1 or can_download_music == 1:
@@ -350,9 +359,38 @@ if backup_playlist == 1:
         # Write final HTML to file
         with open(f"Output/{playlist_name}/playlist_backup_latest.html", "w", encoding="utf-8") as outfile:
             outfile.write(final_html)
-        with open(f"Output/{playlist_name}/{today}_playlist_backup.html", "w", encoding="utf-8") as outfile:
+            print(f"Saved as: /Output/{playlist_name}/playlist_backup_latest.html")
+        with open(f"Output/{playlist_name}/{today_n}_playlist_backup.html", "w", encoding="utf-8") as outfile:
             outfile.write(final_html)
+            print(f"Saved as: /Output/{playlist_name}/{today_n}_playlist_backup.htm")
         if use_database == 1:
             create_database(host,user,password, database)
             add_report(host,user,password, database,video_titles,saved_video_links, playlist_name, playlist_link)
+        if deleted_videos:
+            print(f"Found removed videos!")
+            css_file_path = 'web_template/style_template.css'
+            with open(css_file_path, 'r', encoding='utf-8') as css_file:
+                css_styles = css_file.read()
+            print("Saving playlist deleted videos report to .html (This may take a while)...")
+            # Generate HTML content
+            html_list = generate_html_list_invalid_videos(deleted_videos, deleted_videos_status, playlist_name, playlist_link)
+            # Read HTML template
+            html_template = read_html_template('web_template/html_template_backup_removed_report.html')
+            # Extract head and body from HTML template
+            head, body = extract_head_and_body(html_template)
+            # Define page title based on playlist_name variable
+            page_title = f"Removed videos for Playlist: {playlist_name}"
+            # Load JS template
+            js_code=load_js_code_from_file('web_template/script_head_template.js')
+            # Combine everything into a complete HTML structure with custom page title and CSS styles
+            final_html = f"<html><head><title>{page_title}</title><script>{js_code}</script>{head}<style>{css_styles}</style></head><body>{body}{html_list}<footer><h3>Authors:</h3><div class='links'><a href='https://github.com/Kordight'><strong>Kordight</strong></a></div></footer></body></html>"
+            # Write final HTML to file
+            with open(f"Output/{playlist_name}/playlist_backup_removed_latest.html", "w", encoding="utf-8") as outfile:
+                outfile.write(final_html)
+                print(f"Saved as: /Output/{playlist_name}/playlist_backup_removed_latest.html")
+            with open(f"Output/{playlist_name}/{today_n}_playlist_backup_removed.html", "w", encoding="utf-8") as outfile:
+                outfile.write(final_html)
+                print(f"Saved as: /Output/{playlist_name}/{today_n}_playlist_backup_removed.html")
+
+            
 print("Done.")

@@ -13,9 +13,10 @@ a {
     text-decoration: none;
     color: rgb(62, 100, 144);
 }
+
 a:visited {
     color: rgb(123, 23, 129)
-  }
+}
 
 .border-box {
     /*text-align: left;*/
@@ -45,4 +46,32 @@ a:visited {
 
 a:hover {
     text-decoration: underline;
+}
+
+table td,
+table th {
+    padding-left: 15px;
+    padding-right: 15px;
+    text-align: center;
+}
+
+table tr:nth-child(odd) {
+    background-color: #b8c8ff;
+}
+
+table tr:nth-child(even) {
+    background-color: #cad6ff;
+}
+
+table th {
+    background-color: #7D92DB;
+}
+
+table a {
+    text-decoration: none;
+    color: #727da7;
+}
+
+table a:visited {
+    color: #303b63;
 }

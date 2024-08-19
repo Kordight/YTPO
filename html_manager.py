@@ -31,6 +31,31 @@ def generate_html_list(songs, playlist_name, playlist_url):
     
     return html_content
 
+def generate_html_list_invalid_videos(deleted_videos, deleted_videos_status, playlist_name, playlist_link):
+    # Sort songs alphabetically by title
+    
+    song_amount = len(deleted_videos)
+    html_content = (
+        "<div class='border-box'>"
+        "<h1>Playlist backup</h1><br>"
+        "<h2><a href='"+str(playlist_link)+"'>"+str(playlist_name)+"</a></h2><br>"
+        "<p>Found: <b>" + str(song_amount) + "</b> videos in this playlist.<br>"
+        "<i title='Y-M-D'>Date: "+str(today)+"</i></p><br>"
+        "<table>"
+        "<tr>"
+        "<th>Status</th>"
+        "<th>URL</th>"
+        "<th>Internet Archive search</th>"
+        "</tr>"
+    )
+    
+    for deleted_videos, deleted_videos_status in zip(deleted_videos, deleted_videos_status):
+        #html_content += f"<li><a href='{deleted_videos}' target='_blank'>{deleted_videos_status}</a></li><br>"
+        html_content += f"<tr><td><a href='{deleted_videos}' target='_blank'>{deleted_videos_status}</a></td><td>{deleted_videos}</td><td><a href='https://web.archive.org/web/20240000000000*/{deleted_videos}'>Search on Wayback machine</a></td></tr>"
+    html_content += "</table></div>"
+    
+    return html_content
+
 
 def read_html_template(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
