@@ -1,7 +1,5 @@
 # What is YouTube Playlist Organizer?
 
-Here is an improved and expanded version of your text in English:
-
 ---
 
 YTPO is a program built using the [yt-dlp](https://github.com/yt-dlp/yt-dlp) library. This script allows you to download, archive, and back up your YouTube playlists efficiently. The program offers multiple methods for storing your playlist data: you can save the content in a `MySQL Database`, export it as `csv` or `txt` files, or generate user-friendly `html` reports. 
