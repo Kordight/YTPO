@@ -362,7 +362,7 @@ if backup_playlist == 1:
             print(f"Saved as: /Output/{playlist_name}/playlist_backup_latest.html")
         with open(f"Output/{playlist_name}/{today_n}_playlist_backup.html", "w", encoding="utf-8") as outfile:
             outfile.write(final_html)
-            print(f"Saved as: /Output/{playlist_name}/{today_n}_playlist_backup.htm")
+            print(f"Saved as: /Output/{playlist_name}/{today_n}_playlist_backup.html")
         if use_database == 1:
             create_database(host,user,password, database)
             add_report(host,user,password, database,video_titles,saved_video_links, playlist_name, playlist_link)
