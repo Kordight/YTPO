@@ -51,7 +51,7 @@ def generate_html_list_invalid_videos(deleted_videos, deleted_videos_status, pla
     
     for deleted_videos, deleted_videos_status in zip(deleted_videos, deleted_videos_status):
         #html_content += f"<li><a href='{deleted_videos}' target='_blank'>{deleted_videos_status}</a></li><br>"
-        html_content += f"<tr><td><a href='{deleted_videos}' target='_blank'>{deleted_videos_status}</a></td><td>{deleted_videos}</td><td><a href='https://web.archive.org/web/20240000000000*/{deleted_videos}'>Search on Wayback machine</a></td></tr>"
+        html_content += f"<tr><td><a href='{deleted_videos}' target='_blank'>{deleted_videos_status}</a></td><td>{deleted_videos}</td><td><a href='https://web.archive.org/web/20240000000000*/{deleted_videos}' target='_blank'>Search on Wayback machine</a></td></tr>"
     html_content += "</table></div>"
     
     return html_content
