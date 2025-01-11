@@ -187,6 +187,7 @@ for entry in video_entries:
         video_duration = entry['duration']
         video_titles.append(video_title)
         saved_video_links.append(video_url)
+        video_duration = 0 if video_duration is None else video_duration
         video_durations.append(video_duration)
 
     except Exception as e:
@@ -398,12 +399,19 @@ if backup_playlist == 1:
                 outfile.write(final_html)
                 print(f"Saved as: /Output/{playlist_name}/{today_n}_playlist_backup_removed.html")
 
-# Ensure video_durations is a list of numbers
-video_durations = [int(duration) for duration in video_durations]
+# Ensure video_durations is a list of numbers (done only once)
+video_durations = [int(duration) if duration is not None else 0 for duration in video_durations]
 
 # Now calculate the statistics
-shortest_video_index = video_durations.index(min(video_durations))
-longest_video_index = video_durations.index(max(video_durations))
+filtered_durations = [duration for duration in video_durations if duration > 0]
+
+if filtered_durations:
+    shortest_video_index = video_durations.index(min(filtered_durations))
+    longest_video_index = video_durations.index(max(filtered_durations))  # Ensure this is also inside the block
+else:
+    shortest_video_index = -1 
+    longest_video_index = -1  # Handle case for longest as well
+    print("No valid durations available.")
 
 shortest_video = {
     'title': video_titles[shortest_video_index],
@@ -422,14 +430,12 @@ def format_duration(duration):
     minutes = duration // 60
     seconds = duration % 60
     return f"{minutes}m {seconds}s"
-print(f"Stats:")
+
+print("Stats:")
 print(f"Shortest video: {shortest_video['title']} with duration {format_duration(shortest_video['duration'])}")
 print(f"Longest video: {longest_video['title']} with duration {format_duration(longest_video['duration'])}")
 print(f"Average video duration: {format_duration(int(average_duration))}")
-print(f"Total duration of all videos: {format_duration(int(total_duration))} ({total_duration/8640} days)") 
-   
-# Ensure video_durations is a list of numbers
-video_durations = [int(duration) for duration in video_durations if duration is not None]
+print(f"Total duration of all videos: {format_duration(int(total_duration))} ({total_duration/8640:.2f} days)")    
 
 # Pair each video with its title, URL, and duration
 videos_info = [
@@ -444,12 +450,12 @@ videos_info.sort(key=lambda x: x['duration'], reverse=True)
 top_5_videos = videos_info[:5]
 
 # Print the top 5 longest videos in table format
-print(f"{'Title':<40} {'Duration':<10} {'URL'}")
+print(f"{'Lp':<10} {'Title':<40} {'Duration':<10} {'URL'}")
 print("-" * 80)
-for video in top_5_videos:
+for index, video in enumerate(top_5_videos, start=1):  # Using enumerate to get index
     title = video['title']
     duration = format_duration(video['duration'])
     url = video['url']
-    print(f"{title:<40} {duration:<10} {url}")
+    print(f"{index:<10} {title:<40} {duration:<10} {url}")
 
 print("Done.")
