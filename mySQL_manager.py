@@ -113,7 +113,7 @@ def add_report(host, user, password, database, video_titles, saved_video_links, 
                     # Add video
                     cursor.execute('''
                     INSERT INTO ytp_videos (video_title, video_url, video_length)
-                    VALUES (%s, %s)
+                    VALUES (%s, %s, %s)
                     ''', (title, link, length))
                     video_id = cursor.lastrowid
 
