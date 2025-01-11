@@ -1,4 +1,5 @@
 # Import necessary libraries
+import statistics
 import re
 import difflib
 import yt_dlp
@@ -175,14 +176,20 @@ create_folder_if_none(f"Output/{playlist_name}")
 # Process playlist videos
 video_titles = []
 saved_video_links = []
+video_durations = []  # Nowa zmienna do przechowywania długości filmów w sekundach
 invalid_video_links = []
+
 print(f"Processed {len(video_entries)} video(s) in {playlist_name}")
 for entry in video_entries:
     try:
         video_title = entry['title']
         video_url = entry['url']
+        video_duration = entry['duration']
+        # Zakładając, że video_duration jest w sekundach
         video_titles.append(video_title)
         saved_video_links.append(video_url)
+        video_durations.append(video_duration)  # Przechowuj w sekundach
+
     except Exception as e:
         invalid_video_links.append((entry['url'], str(e)))
         logging.error(f"Invalid link: {entry['url']} -- {e}")
@@ -392,5 +399,57 @@ if backup_playlist == 1:
                 outfile.write(final_html)
                 print(f"Saved as: /Output/{playlist_name}/{today_n}_playlist_backup_removed.html")
 
-            
+# Ensure video_durations is a list of numbers
+video_durations = [int(duration) for duration in video_durations]
+
+# Now calculate the statistics
+shortest_video_index = video_durations.index(min(video_durations))
+longest_video_index = video_durations.index(max(video_durations))
+
+shortest_video = {
+    'title': video_titles[shortest_video_index],
+    'duration': video_durations[shortest_video_index]
+}
+
+longest_video = {
+    'title': video_titles[longest_video_index],
+    'duration': video_durations[longest_video_index]
+}
+
+average_duration = statistics.mean(video_durations)
+total_duration = sum(video_durations)
+
+def format_duration(duration):
+    minutes = duration // 60
+    seconds = duration % 60
+    return f"{minutes}m {seconds}s"
+print(f"Stats:")
+print(f"Shortest video: {shortest_video['title']} with duration {format_duration(shortest_video['duration'])}")
+print(f"Longest video: {longest_video['title']} with duration {format_duration(longest_video['duration'])}")
+print(f"Average video duration: {format_duration(int(average_duration))}")
+print(f"Total duration of all videos: {format_duration(int(total_duration))} ({total_duration/8640} days)")    
+# Ensure video_durations is a list of numbers
+video_durations = [int(duration) for duration in video_durations]
+
+# Pair each video with its title, URL, and duration
+videos_info = [
+    {'title': video_titles[i], 'url': saved_video_links[i], 'duration': video_durations[i]}
+    for i in range(len(video_titles))
+]
+
+# Sort videos by duration in descending order (longest first)
+videos_info.sort(key=lambda x: x['duration'], reverse=True)
+
+# Get top 5 longest videos
+top_5_videos = videos_info[:5]
+
+# Print the top 5 longest videos in table format
+print(f"{'Title':<40} {'Duration':<10} {'URL'}")
+print("-" * 80)
+for video in top_5_videos:
+    title = video['title']
+    duration = format_duration(video['duration'])
+    url = video['url']
+    print(f"{title:<40} {duration:<10} {url}")
+
 print("Done.")

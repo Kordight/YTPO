@@ -28,7 +28,8 @@ def create_database(host, user, password, database):
             CREATE TABLE IF NOT EXISTS ytp_videos (
                 video_id INT AUTO_INCREMENT PRIMARY KEY,
                 video_title VARCHAR(255),
-                video_url VARCHAR(255) UNIQUE
+                video_url VARCHAR(255) UNIQUE,
+                video_length INT
             )
             ''')
 
@@ -60,7 +61,7 @@ def create_database(host, user, password, database):
             cursor.close()
             conn.close()
 
-def add_report(host, user, password, database, video_titles, saved_video_links, playlist_name, playlist_url):
+def add_report(host, user, password, database, video_titles, saved_video_links, playlist_name, playlist_url,video_durations):
     conn = None  # Initialize conn to None
     try:
         conn = mysql.connector.connect(
@@ -99,7 +100,7 @@ def add_report(host, user, password, database, video_titles, saved_video_links, 
             report_id = cursor.lastrowid
 
             # Add videos and report details
-            for title, link in zip(video_titles, saved_video_links):
+            for title, link, length in zip(video_titles, saved_video_links):
                 # Check if video already exists
                 cursor.execute('''
                 SELECT video_id FROM ytp_videos WHERE video_url = %s
@@ -111,9 +112,9 @@ def add_report(host, user, password, database, video_titles, saved_video_links, 
                 else:
                     # Add video
                     cursor.execute('''
-                    INSERT INTO ytp_videos (video_title, video_url)
+                    INSERT INTO ytp_videos (video_title, video_url, video_length)
                     VALUES (%s, %s)
-                    ''', (title, link))
+                    ''', (title, link, length))
                     video_id = cursor.lastrowid
 
                 # Add report detail
