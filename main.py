@@ -427,15 +427,17 @@ average_duration = statistics.mean(video_durations)
 total_duration = sum(video_durations)
 
 def format_duration(duration):
-    minutes = duration // 60
+    hours = duration // 3600
+    minutes = (duration % 3600) // 60
     seconds = duration % 60
-    return f"{minutes}m {seconds}s"
+    return f"{hours}h {minutes}m {seconds}s"
 
 print("Stats:")
 print(f"Shortest video: {shortest_video['title']} with duration {format_duration(shortest_video['duration'])}")
 print(f"Longest video: {longest_video['title']} with duration {format_duration(longest_video['duration'])}")
 print(f"Average video duration: {format_duration(int(average_duration))}")
 print(f"Total duration of all videos: {format_duration(int(total_duration))} ({total_duration / 86400:.2f} days)")
+
 # Pair each video with its title, URL, and duration
 videos_info = [
     {'title': video_titles[i], 'url': saved_video_links[i], 'duration': video_durations[i]}
