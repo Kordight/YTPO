@@ -176,7 +176,7 @@ create_folder_if_none(f"Output/{playlist_name}")
 # Process playlist videos
 video_titles = []
 saved_video_links = []
-video_durations = []  # Nowa zmienna do przechowywania długości filmów w sekundach
+video_durations = []  
 invalid_video_links = []
 
 print(f"Processed {len(video_entries)} video(s) in {playlist_name}")
@@ -185,10 +185,9 @@ for entry in video_entries:
         video_title = entry['title']
         video_url = entry['url']
         video_duration = entry['duration']
-        # Zakładając, że video_duration jest w sekundach
         video_titles.append(video_title)
         saved_video_links.append(video_url)
-        video_durations.append(video_duration)  # Przechowuj w sekundach
+        video_durations.append(video_duration)
 
     except Exception as e:
         invalid_video_links.append((entry['url'], str(e)))
