@@ -61,7 +61,7 @@ def create_database(host, user, password, database):
             cursor.close()
             conn.close()
 
-def add_report(host, user, password, database, video_titles, saved_video_links, playlist_name, playlist_url,video_durations):
+def add_report(host, user, password, database, video_titles, saved_video_links, playlist_name, playlist_url, video_durations):
     conn = None  # Initialize conn to None
     try:
         conn = mysql.connector.connect(

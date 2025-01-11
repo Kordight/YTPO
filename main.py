@@ -372,7 +372,7 @@ if backup_playlist == 1:
             print(f"Saved as: /Output/{playlist_name}/{today_n}_playlist_backup.html")
         if use_database == 1:
             create_database(host,user,password, database)
-            add_report(host,user,password, database,video_titles,saved_video_links, playlist_name, playlist_link)
+            add_report(host,user,password, database,video_titles,saved_video_links, playlist_name, playlist_link, video_durations)
         if deleted_videos:
             print(f"Found removed videos!")
             css_file_path = 'web_template/style_template.css'
