@@ -100,7 +100,7 @@ def add_report(host, user, password, database, video_titles, saved_video_links, 
             report_id = cursor.lastrowid
 
             # Add videos and report details
-            for title, link, length in zip(video_titles, saved_video_links):
+            for title, link, length in zip(video_titles, saved_video_links, video_durations):
                 # Check if video already exists
                 cursor.execute('''
                 SELECT video_id FROM ytp_videos WHERE video_url = %s
