@@ -435,8 +435,7 @@ print("Stats:")
 print(f"Shortest video: {shortest_video['title']} with duration {format_duration(shortest_video['duration'])}")
 print(f"Longest video: {longest_video['title']} with duration {format_duration(longest_video['duration'])}")
 print(f"Average video duration: {format_duration(int(average_duration))}")
-print(f"Total duration of all videos: {format_duration(int(total_duration))} ({total_duration/8640:.2f} days)")    
-
+print(f"Total duration of all videos: {format_duration(int(total_duration))} ({total_duration / 86400:.2f} days)")
 # Pair each video with its title, URL, and duration
 videos_info = [
     {'title': video_titles[i], 'url': saved_video_links[i], 'duration': video_durations[i]}
